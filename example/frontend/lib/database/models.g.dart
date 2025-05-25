@@ -3,7 +3,7 @@
 
 import 'dart:convert';
 import 'package:sqlite_async/sqlite3_common.dart';
-import 'package:tether/schema/tether_model.dart';
+import 'package:tether_libs/models/tether_model.dart';
 
 /// Represents the `bookstores` table.
 class BookstoreModel extends TetherModel<BookstoreModel> {

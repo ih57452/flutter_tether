@@ -4,7 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
 import 'package:tether_generators/config/config_model.dart';
 import 'package:tether_generators/utils/schema_version_manager.dart'; // Keep for version tracking
-import 'package:tether_libs/schema/table_info.dart';
+import 'package:tether_libs/models/table_info.dart';
 import 'package:tether_libs/utils/logger.dart';
 
 /// Generates Dart files containing SQL migration strings.

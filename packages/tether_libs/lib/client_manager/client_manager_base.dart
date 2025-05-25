@@ -3,10 +3,10 @@ import 'dart:developer';
 
 import 'package:sqlite_async/sqlite_async.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tether_libs/schema/table_info.dart';
+import 'package:tether_libs/models/supabase_select_builder_base.dart';
+import 'package:tether_libs/models/tether_model.dart';
+import 'package:tether_libs/models/table_info.dart';
 import 'client_manager_models.dart';
-import '../models/supabase_select_builder_base.dart';
-import '../models/tether_model.dart';
 
 class ClientManagerBase<TModel extends TetherModel<TModel>>
     implements Future<List<TModel>> {

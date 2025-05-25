@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:tether_libs/schema/table_info.dart';
+import 'package:tether_libs/models/table_info.dart';
 
 Map<String, SupabaseTableInfo> loadTableSchemasSync(String schemaDirectory) {
   final schemaFiles = Directory(

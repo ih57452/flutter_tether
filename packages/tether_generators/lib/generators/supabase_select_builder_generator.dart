@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p; // For path joining
 import 'package:tether_generators/config/config_model.dart';
 
 // Import config and schema classes
-import 'package:tether_libs/schema/table_info.dart';
+import 'package:tether_libs/models/table_info.dart';
 import 'package:tether_libs/utils/to_camel_case.dart';
 import 'package:tether_libs/utils/string_utils.dart';
 import 'package:tether_libs/utils/logger.dart';
@@ -94,7 +94,7 @@ class SupabaseSelectBuilderGenerator {
     sb.writeln('// GENERATED CODE - DO NOT MODIFY BY HAND');
     sb.writeln('// Contains the static schema definition for Supabase tables.');
     sb.writeln();
-    sb.writeln("import 'package:tether/schema/table_info.dart';");
+    sb.writeln("import 'package:tether_libs/models/table_info.dart';");
     sb.writeln();
     sb.writeln(
       '// ignore_for_file: prefer_single_quotes, unnecessary_brace_in_string_interps, unnecessary_string_interpolations',
@@ -222,7 +222,7 @@ class SupabaseSelectBuilderGenerator {
     );
 
     final Set<String> imports = {
-      "import 'package:tether/schema/supabase_select_builder_base.dart';",
+      "import 'package:tether_libs/models/supabase_select_builder_base.dart';",
       "import '$schemaFileName'; // Import the generated schema",
     };
 
@@ -346,10 +346,11 @@ class SupabaseSelectBuilderGenerator {
       var relationshipName = _deriveRelationshipName(fk);
       final methodName = StringUtils.capitalize(relationshipName);
 
+      // Add innerJoin parameter to the method signature
       sb.writeln(
-        '  $className with$methodName([$relatedBuilderClassName? builder]) {',
+        '  $className with$methodName($relatedBuilderClassName? builder, {bool innerJoin = false}) {', // Renamed parameter
       );
-      // Nested builder instantiation remains the same (it will also look up its info from globalSupabaseSchema)
+      // Nested builder instantiation remains the same
       sb.writeln(
         '    final finalBuilder = builder ?? $relatedBuilderClassName();',
       );
@@ -361,14 +362,14 @@ class SupabaseSelectBuilderGenerator {
       sb.writeln('    addSupabaseRelated(');
       sb.writeln('        jsonKey: \'$relationshipName\',');
       sb.writeln('        fkConstraintName: \'${fk.constraintName}\',');
-      sb.writeln('        nestedBuilder: finalBuilder);');
+      sb.writeln('        nestedBuilder: finalBuilder,');
+      sb.writeln('        innerJoin: innerJoin);'); // Pass the renamed flag
       sb.writeln('    return this;');
       sb.writeln('  }');
       sb.writeln();
     }
 
     // Generate methods for reverse relationships
-    // Generate methods for reverse relationships (FKs in other tables pointing to this one)
     final reverseFkInfos = _reverseForeignKeyMap[table.uniqueKey] ?? [];
     for (final reverseInfo in reverseFkInfos) {
       final referencingTable = reverseInfo.referencingTable;
@@ -380,39 +381,21 @@ class SupabaseSelectBuilderGenerator {
         continue;
       }
 
-      // The builder for the table that is referencing the current table.
-      // e.g., if current table is Bookstores, referencingTable is bookstore_books,
-      // then relatedBuilderClassName is BookstoreBooksSelectBuilder.
       final relatedBuilderClassName = StringUtils.toClassName(
         referencingTable.originalName,
         suffix: 'SelectBuilder',
       );
 
-      String
-      relationshipName; // This will be used for jsonKey and as the base for the method name
-
-      // Check if the referencingTable is acting as a join table for THIS specific FK relationship
-      // fk.joinTableName is set if the table OWNING the fk is a join table.
-      // So, reverseInfo.fk is an FK on referencingTable. If referencingTable is a join table,
-      // reverseInfo.fk.joinTableName will be referencingTable.originalName.
+      String relationshipName;
       final bool isReferencingTableAJoinTableForThisFk =
           reverseInfo.fk.joinTableName != null &&
           reverseInfo.fk.joinTableName == referencingTable.originalName;
 
       if (isReferencingTableAJoinTableForThisFk) {
-        // Case 1: The referencingTable IS a join table.
-        // The method on the current table's builder should be named after the join table itself.
-        // e.g., Current: Bookstores. Referencing: bookstore_books (join table).
-        // Method: BookstoresSelectBuilder.withBookstoreBooks([BookstoreBooksSelectBuilder builder])
-        // The relationshipName (and jsonKey) should be the camelCase version of the join table's name.
         relationshipName = toCamelCase(
           referencingTable.originalName,
         ); // "bookstoreBooks"
       } else {
-        // Case 2: The referencingTable is NOT a join table (it's a standard table with a 1-to-many FK to the current table).
-        // We need to decide if the name should be based on the referencingTable's name or a role (derived from FK).
-
-        // Count how many distinct FKs from `referencingTable` point to the `currentTable`.
         int fkCountFromReferencingToCurrent = 0;
         for (final fkOnReferencingTable in referencingTable.foreignKeys) {
           if (fkOnReferencingTable.foreignTableSchema == table.schema &&
@@ -423,25 +406,16 @@ class SupabaseSelectBuilderGenerator {
         }
 
         if (fkCountFromReferencingToCurrent > 1) {
-          // Multiple FKs exist from referencingTable to currentTable.
-          // Use a role-based name derived from the specific FK.
-          // e.g., Current: Images. Referencing: Books. FKs on Books: cover_image_id, banner_image_id.
-          // Method for cover_image_id: ImagesSelectBuilder.withCoverImages([BooksSelectBuilder builder])
           final roleName = _deriveRelationshipName(
-            reverseInfo
-                .fk, // The specific FK on referencingTable pointing to currentTable
+            reverseInfo.fk,
             referencingTableName: referencingTable.originalName,
-            isReverseRelationship: true, // Derives name like "coverImage"
+            isReverseRelationship: true,
           );
-          relationshipName = pluralize(roleName); // "coverImages"
+          relationshipName = pluralize(roleName);
         } else {
-          // Single, unambiguous FK from referencingTable to currentTable.
-          // Use a name based on the referencingTable.
-          // e.g., Current: Authors. Referencing: Books. FK on Books: author_id.
-          // Method: AuthorsSelectBuilder.withBooks([BooksSelectBuilder builder])
           relationshipName = pluralize(
             toCamelCase(referencingTable.originalName),
-          ); // "books"
+          );
         }
       }
 
@@ -475,8 +449,9 @@ class SupabaseSelectBuilderGenerator {
       }
       generatedMethodNames.add(methodName);
 
+      // Add innerJoin parameter to the method signature
       sb.writeln(
-        '  $className with$methodName([$relatedBuilderClassName? builder]) {',
+        '  $className with$methodName($relatedBuilderClassName? builder, {bool innerJoin = false}) {', // Renamed parameter
       );
       sb.writeln(
         '    final finalBuilder = builder ?? $relatedBuilderClassName();',
@@ -491,7 +466,8 @@ class SupabaseSelectBuilderGenerator {
       sb.writeln(
         '        fkConstraintName: \'${reverseInfo.fk.constraintName}\',',
       ); // This is the FK on referencingTable
-      sb.writeln('        nestedBuilder: finalBuilder);');
+      sb.writeln('        nestedBuilder: finalBuilder,');
+      sb.writeln('        innerJoin: innerJoin);'); // Pass the renamed flag
       sb.writeln('    return this;');
       sb.writeln('  }');
       sb.writeln();

@@ -1,8 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart'; // Import the wrapper
+import 'package:tether_libs/models/supabase_select_builder_base.dart';
+import 'package:tether_libs/models/tether_model.dart';
 import 'client_manager_base.dart';
 import 'client_manager_models.dart';
-import '../models/supabase_select_builder_base.dart';
-import '../models/tether_model.dart';
 
 /// A builder for transforming Supabase queries with pagination, ordering, and limiting capabilities.
 /// Also applies transformations to an associated Drift query if present.

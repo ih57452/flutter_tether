@@ -1,11 +1,11 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // Core Migration: Feed Item References
 // Migration version: 0000
-// Generated on 2025-05-22T16:52:53.913666
+// Generated on 2025-05-24T15:29:14.879929
 
 const List<String> migrationSqlStatementsV0000_core_feed = [
   '''-- Core Feed Item References Table (Version 0000)''',
-  '''-- Generated on 2025-05-22T16:52:53.913666''',
+  '''-- Generated on 2025-05-24T15:29:14.879929''',
   r'''
 CREATE TABLE IF NOT EXISTS feed_item_references (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

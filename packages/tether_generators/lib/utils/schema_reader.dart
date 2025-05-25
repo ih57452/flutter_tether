@@ -2,7 +2,7 @@
 import 'package:collection/collection.dart'; // Added import
 import 'package:postgres/postgres.dart';
 import 'package:tether_generators/config/config_model.dart';
-import 'package:tether_libs/schema/table_info.dart';
+import 'package:tether_libs/models/table_info.dart';
 import 'package:tether_libs/utils/to_camel_case.dart';
 import 'package:tether_libs/utils/logger.dart';
 

@@ -2,14 +2,13 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tether/schema/supabase_select_builder_base.dart';
-import 'package:tether/client_manager/client_manager.dart';
+import 'package:tether_libs/client_manager/client_manager.dart';
 import '../models.g.dart'; // Assumes models.dart is in outputDirectory
 import '../database.dart'; // Assumes database.dart is in outputDirectory
 import '../supabase_schema.dart'; // Corrected relative import for schema file
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/search_feed_provider.dart';
+import '../providers/feed_provider.dart';
 
 class AuthorsManager extends ClientManager<AuthorModel> {
   AuthorsManager({
@@ -36,14 +35,14 @@ final authorsManagerProvider = Provider<AuthorsManager>((ref) {
   );
 });
 
-final authorsSearchFeedProvider = StreamNotifierProvider.autoDispose.family<
-  SearchStreamNotifier<AuthorModel>, // NotifierT: Your notifier class
+final authorsFeedProvider = StreamNotifierProvider.autoDispose.family<
+  FeedStreamNotifier<AuthorModel>, // NotifierT: Your notifier class
   List<AuthorModel>, // StateT: The type of data the stream emits
-  SearchStreamNotifierSettings<
+  FeedStreamNotifierSettings<
     AuthorModel
   > // ArgT: The type of the settings argument
 >(() {
   // Instantiate the notifier and return it
-  return SearchStreamNotifier<AuthorModel>();
+  return FeedStreamNotifier<AuthorModel>();
 });
 

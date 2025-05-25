@@ -5,7 +5,7 @@ import 'package:inflection3/inflection3.dart';
 import 'package:path/path.dart' as p;
 import 'package:recase/recase.dart';
 import 'package:tether_generators/config/config_model.dart';
-import 'package:tether_libs/schema/table_info.dart';
+import 'package:tether_libs/models/table_info.dart';
 import 'package:tether_libs/utils/logger.dart';
 
 /// Represents information about a reverse relationship (one-to-many or many-to-many).
@@ -267,7 +267,7 @@ class ModelGenerator {
     buffer.writeln();
     buffer.writeln("import 'dart:convert';");
     buffer.writeln("import 'package:sqlite_async/sqlite3_common.dart';");
-    buffer.writeln("import 'package:tether/schema/tether_model.dart';");
+    buffer.writeln("import 'package:tether_libs/models/tether_model.dart';");
     buffer.writeln();
     // Potentially add imports for custom types if needed later
   }

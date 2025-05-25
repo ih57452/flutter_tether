@@ -1,7 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // Contains the static schema definition for Supabase tables.
 
-import 'package:tether/schema/table_info.dart';
+import 'package:tether_libs/models/table_info.dart';
 
 // ignore_for_file: prefer_single_quotes, unnecessary_brace_in_string_interps, unnecessary_string_interpolations
 

@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart'; // For @immutable
 import 'package:sqlite_async/sqlite3_common.dart';
-import '../models/tether_model.dart';
-import '../models/supabase_select_builder_base.dart'; // Import SupabaseColumn
+import 'package:tether_libs/models/supabase_select_builder_base.dart';
+import 'package:tether_libs/models/tether_model.dart';
 
 typedef FromJsonFactory<T extends TetherModel<T>> =
     T Function(Map<String, dynamic> json);

@@ -1,23 +1,73 @@
-import 'package:example/database/managers/books_client_manager.g.dart';
-import 'package:example/database/models.g.dart';
-import 'package:example/database/providers/search_feed_provider.dart';
-import 'package:example/database/supabase_select_builders.dart';
-import 'package:example/models/selects.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example/database/models.g.dart';
+import 'package:example/database/providers/feed_provider.dart';
+import 'package:example/database/supabase_select_builders.dart';
+import 'package:example/models/selects.dart';
+import 'package:example/database/managers/books_client_manager.g.dart';
+import 'package:example/database/managers/genres_client_manager.g.dart';
+import 'package:tether_libs/client_manager/client_manager_filter_builder.dart';
 
-final bookSearchSettingsProvider = Provider<
-  SearchStreamNotifierSettings<BookModel>
->((ref) {
+// Provider to fetch all genres
+final allGenresProvider = FutureProvider<List<GenreModel>>((ref) async {
+  final genresManager = ref.watch(genresManagerProvider);
+  // Assuming a method like getAll() or query().getAll() exists
+  // For this example, let's assume it fetches all genres without specific filters.
+  // You might need to adjust this based on your ClientManager capabilities.
+  return await genresManager.query().select(genreSelect);
+});
+
+class StringNotifier extends Notifier<String?> {
+  StringNotifier() : super();
+
+  @override
+  String? build() {
+    return null; // Initial state is null, meaning no genre selected
+  }
+
+  void set(String? newString) {
+    state = newString;
+  }
+}
+
+// Provider to manage the selected genre ID.
+final selectedGenreIdProvider = NotifierProvider<StringNotifier, String?>(
+  StringNotifier.new,
+); // Starts with no genre selected
+
+// Update bookFeedProvider to use the selected genre's book IDs in queryCustomizer
+final bookFeedProvider = Provider<FeedStreamNotifierSettings<BookModel>>((ref) {
   final bookClientManager = ref.watch(booksManagerProvider);
-  return SearchStreamNotifierSettings<BookModel>(
-    feedKey: 'books_feed',
-    searchColumn: BooksColumn.document,
+  final selectedGenreId = ref.watch(
+    selectedGenreIdProvider,
+  ); // Read current selection
+
+  // This function will be the queryCustomizer. It captures the current bookIdsAsyncValue.
+  // When bookIdsAsyncValue changes, bookFeedProvider re-evaluates, creating new settings
+  // with a new queryCustomizer instance.
+  ClientManagerFilterBuilder<BookModel> queryCustomizer(
+    ClientManagerFilterBuilder<BookModel> baseQuery,
+  ) {
+    if (selectedGenreId == null) {
+      // No genre selected, apply no genre-specific filter.
+      return baseQuery;
+    }
+
+    return baseQuery.eq(BookGenresColumn.genreId, selectedGenreId);
+  }
+
+  return FeedStreamNotifierSettings<BookModel>(
+    // Consider if feedKey needs to be dynamic if queryCustomizer changes fundamentally
+    // e.g., feedKey: 'books_feed_genre_${ref.watch(selectedGenreIdProvider) ?? "all"}'
+    // For now, a static key means the notifier might try to reuse cache, but a new
+    // queryCustomizer should trigger a full refresh from page 1.
+    feedKey: 'books_feed_customized_by_genre',
     clientManager: bookClientManager,
-    selectArgs: bookSelect, // Use your stable bookSelect instance
-    fromJsonFactory: BookModel.fromJson, // Static method
+    selectArgs: bookSelect,
+    fromJsonFactory: BookModel.fromJson,
     pageSize: 20,
-    // queryCustomizer: (baseQuery) => baseQuery.eq(BooksColumn.someField, someStableValue), // If needed
+    queryCustomizer:
+        queryCustomizer, // Assign the dynamically created customizer
   );
 });
 
@@ -29,37 +79,27 @@ class FeedTab extends ConsumerStatefulWidget {
 }
 
 class _FeedTabState extends ConsumerState<FeedTab> {
-  final TextEditingController _searchController = TextEditingController();
-  final ScrollController _scrollController =
-      ScrollController(); // 1. Add ScrollController
-  String _searchTerm = '';
-  bool _isFetchingMore = false; // To prevent multiple fetch calls
+  final ScrollController _scrollController = ScrollController();
+  bool _isFetchingMore = false;
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(() {
-      // Debounce search logic can be added here
-      // For now, direct search on submit or button press
-    });
-
-    // 2. Add listener to ScrollController
     _scrollController.addListener(_scrollListener);
+    // Initial data load will be triggered by the FeedStreamNotifier
+    // when it's first watched, using the initial queryCustomizer.
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _scrollController.removeListener(_scrollListener); // 3. Remove listener
-    _scrollController.dispose(); // 3. Dispose controller
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
     super.dispose();
   }
 
   void _scrollListener() {
-    // Check if we're near the end of the scroll extent
     if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent -
-                200 && // 200px threshold
+            _scrollController.position.maxScrollExtent - 200 &&
         !_isFetchingMore) {
       _fetchMore();
     }
@@ -67,86 +107,94 @@ class _FeedTabState extends ConsumerState<FeedTab> {
 
   Future<void> _fetchMore() async {
     if (_isFetchingMore) return;
+    setState(() => _isFetchingMore = true);
 
-    setState(() {
-      _isFetchingMore = true;
-    });
-
-    // Get the notifier instance for the current provider settings
-    // Note: It's important that 'provider' here is the same instance
-    // or an equivalent one that refers to the currently active notifier.
-    final settings = ref.read(bookSearchSettingsProvider);
-    final notifier = ref.read(booksSearchFeedProvider(settings).notifier);
-
-    // print("Fetching more items..."); // For debugging
+    // Watch the reactive bookFeedProvider to get current settings
+    final settings = ref.read(bookFeedProvider);
+    final notifier = ref.read(booksFeedProvider(settings).notifier);
     await notifier.fetchMoreItems();
 
     if (mounted) {
-      setState(() {
-        _isFetchingMore = false;
-      });
+      setState(() => _isFetchingMore = false);
     }
   }
 
-  void _performSearch() {
-    _searchTerm = _searchController.text;
-    // Get the notifier instance for the current provider settings
-    final settings = ref.read(bookSearchSettingsProvider);
-    final notifier = ref.read(booksSearchFeedProvider(settings).notifier);
-    notifier.search(_searchTerm); // Call search on the notifier
-    // print("Searching for: $_searchTerm");
+  void _updateSelectedGenre(String? genreId) {
+    ref.read(selectedGenreIdProvider.notifier).set(genreId);
   }
 
   @override
   Widget build(BuildContext context) {
-    final settings = ref.read(bookSearchSettingsProvider);
-    final asyncValue = ref.watch(booksSearchFeedProvider(settings));
-
-    print("Async Value: ${asyncValue.error}"); // For debugging
+    // Watch the reactive bookFeedProvider to get current settings
+    final settings = ref.watch(bookFeedProvider);
+    // Pass these potentially changing settings to the booksFeedProvider family
+    final booksAsyncValue = ref.watch(booksFeedProvider(settings));
+    final genresAsyncValue = ref.watch(allGenresProvider);
+    final currentSelectedGenreId = ref.watch(selectedGenreIdProvider);
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              labelText: 'Search Books (Full-Text)',
-              hintText: 'Enter title, description, tags...',
-              prefixIcon: const Icon(Icons.search),
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: _performSearch,
+        // Genre Filter Section
+        genresAsyncValue.when(
+          data: (genres) {
+            if (genres.isEmpty) return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Wrap(
+                spacing: 8.0,
+                runSpacing: 4.0,
+                children: [
+                  ChoiceChip(
+                    label: const Text('All Genres'),
+                    selected: currentSelectedGenreId == null,
+                    onSelected:
+                        (_) => _updateSelectedGenre(null), // Use new method
+                  ),
+                  ...genres.map((genre) {
+                    return ChoiceChip(
+                      label: Text(genre.name),
+                      selected: currentSelectedGenreId == genre.id,
+                      onSelected:
+                          (_) =>
+                              _updateSelectedGenre(genre.id), // Use new method
+                    );
+                  }),
+                ],
               ),
-            ),
-            onSubmitted: (_) => _performSearch(),
-          ),
+            );
+          },
+          loading:
+              () => const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Center(
+                  child: CircularProgressIndicator(strokeWidth: 2.0),
+                ),
+              ),
+          error:
+              (err, stack) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('Error loading genres: $err'),
+              ),
         ),
+
+        // Books List Section
         Expanded(
-          child: asyncValue.when(
-            data: (stream) {
-              if (stream.isEmpty &&
-                  _searchTerm.isNotEmpty &&
-                  !asyncValue.isLoading) {
-                return const Center(child: Text('No books found.'));
-              }
-              if (stream.isEmpty &&
-                  _searchTerm.isEmpty &&
-                  !asyncValue.isLoading) {
-                // You might want to show a message or a different UI
-                // if the initial feed is empty before any search.
-                // Or trigger an initial fetch if not done by the provider.
-                return const Center(child: Text('No books available.'));
+          child: booksAsyncValue.when(
+            data: (bookList) {
+              if (bookList.isEmpty && !booksAsyncValue.isLoading) {
+                return Center(
+                  child: Text(
+                    currentSelectedGenreId == null
+                        ? 'No books available.'
+                        : 'No books found for the selected genre.',
+                  ),
+                );
               }
               return ListView.builder(
-                controller:
-                    _scrollController, // 4. Assign controller to ListView
-                itemCount:
-                    stream.length +
-                    (_isFetchingMore ? 1 : 0), // Add space for loader
+                controller: _scrollController,
+                itemCount: bookList.length + (_isFetchingMore ? 1 : 0),
                 itemBuilder: (context, index) {
-                  if (index == stream.length && _isFetchingMore) {
+                  if (index == bookList.length && _isFetchingMore) {
                     return const Center(
                       child: Padding(
                         padding: EdgeInsets.all(8.0),
@@ -154,23 +202,27 @@ class _FeedTabState extends ConsumerState<FeedTab> {
                       ),
                     );
                   }
-                  if (index >= stream.length) {
-                    return const SizedBox.shrink(); // Should not happen if itemCount is correct
+                  if (index >= bookList.length) {
+                    return const SizedBox.shrink();
                   }
 
-                  final book = stream[index];
+                  final book = bookList[index];
                   return ListTile(
-                    title: Text(book.title ?? 'No Title'),
+                    title: Text(book.title),
                     subtitle: Text(
-                      '${book.author?.firstName ?? 'Unknown'} ${book.author?.lastName ?? ''}',
+                      'Author: ${book.author?.firstName ?? 'N/A'} ${book.author?.lastName ?? ''}\n'
+                      'Genres: ${book.bookGenres?.map((bg) => bg.genre?.name ?? 'N/A').join(', ') ?? 'N/A'}',
                     ),
-                    // Add more details or an onTap handler
+                    isThreeLine: true,
+                    // You can add onTap to navigate to book details
                   );
                 },
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, stack) => Center(child: Text('Error: $err')),
+            error:
+                (err, stack) =>
+                    Center(child: Text('Error loading books: $err')),
           ),
         ),
       ],

@@ -8,9 +8,8 @@ import 'generators/client_manager_generator.dart';
 import 'generators/core_migrations_generator.dart';
 import 'generators/database_generator.dart';
 import 'generators/feed_manager_generator.dart';
-import 'generators/feed_provider_generator.dart';
 import 'generators/model_generator.dart';
-import 'generators/search_feed_provider_generator.dart';
+import 'generators/feed_provider_generator.dart';
 import 'generators/sqlite_schema_generator.dart';
 import 'generators/supabase_select_builder_generator.dart';
 import 'generators/user_preferences_manager_generator.dart';
@@ -109,12 +108,6 @@ class SupabaseGenerator {
                   .providersDirectoryPath, // Adjust if your project structure is different
         );
         await feedProvider.generate();
-        final searchProvider = SearchFeedProviderGenerator(
-          outputDirectory:
-              config
-                  .providersDirectoryPath, // Adjust if your project structure is different
-        );
-        await searchProvider.generate();
       }
 
       _logger.info('Code generation complete.');

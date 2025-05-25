@@ -1,310 +1,427 @@
-// GENERATED CODE - Consider if this file should be manually maintained or always generated.
-// If generated, add appropriate DO NOT MODIFY BY HAND comments.
 
-import 'package:example/database/database.dart';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: constant_identifier_names
+
+import 'dart:convert';
+
+import 'package:equatable/equatable.dart';
+import 'package:tether_libs/models/supabase_select_builder_base.dart';
+import 'package:tether_libs/models/tether_model.dart';
+import 'package:tether_libs/utils/logger.dart';
+import 'package:sqlite_async/sqlite3_common.dart';
+import 'package:tether_libs/client_manager/client_manager.dart';
+import 'package:tether_libs/client_manager/client_manager_filter_builder.dart';
+import 'package:tether_libs/client_manager/client_manager_models.dart';
+import 'package:sqlite_async/sqlite_async.dart'; // Ensure SqliteDatabase is imported
+
+import '../database.dart';
+import '../managers/feed_item_reference_manager.g.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sqlite_async/sqlite_async.dart';
 
-/// Represents an item reference stored in a feed.
-class FeedItemReference {
-  final String itemSourceTable;
-  final String itemSourceId;
-  final int displayOrder;
+typedef QueryBuilderFactory<TModel extends TetherModel<TModel>> =
+    ClientManagerFilterBuilder<TModel> Function();
 
-  FeedItemReference({
-    required this.itemSourceTable,
-    required this.itemSourceId,
-    required this.displayOrder,
+class FeedStreamNotifierSettings<TModel extends TetherModel<TModel>>
+    extends Equatable {
+  final String feedKey;
+  final SupabaseColumn? searchColumn; // Made nullable
+  final int pageSize;
+  final ClientManager<TModel> clientManager;
+  final SupabaseSelectBuilderBase selectArgs;
+  final TModel Function(Map<String, dynamic> json) fromJsonFactory;
+  final ClientManagerFilterBuilder<TModel> Function(
+    ClientManagerFilterBuilder<TModel> baseQuery,
+  )?
+  queryCustomizer; // This can define the "base filtered view"
+
+  const FeedStreamNotifierSettings({
+    required this.feedKey,
+    this.searchColumn, // Nullable, so not required
+    required this.clientManager,
+    required this.selectArgs,
+    required this.fromJsonFactory,
+    this.pageSize = 20,
+    this.queryCustomizer,
   });
 
-  factory FeedItemReference.fromMap(Map<String, dynamic> map) {
-    return FeedItemReference(
-      itemSourceTable: map['item_source_table'] as String,
-      itemSourceId: map['item_source_id'] as String,
-      displayOrder: map['display_order'] as int,
-    );
-  }
+  @override
+  List<Object?> get props => [
+    feedKey,
+    searchColumn,
+    pageSize,
+    clientManager, // Relies on stable identity from its provider
+    selectArgs, // Relies on stable identity (e.g., const)
+    fromJsonFactory, // Static methods have stable identity
+    queryCustomizer, // Needs stable identity if provided
+  ];
 }
 
-class FeedItemReferenceManager {
-  final SqliteDatabase db;
-  static const String _tableName = 'feed_item_references';
+class FeedStreamNotifier<TModel extends TetherModel<TModel>>
+    extends
+        FamilyStreamNotifier<List<TModel>, FeedStreamNotifierSettings<TModel>> {
+  late FeedStreamNotifierSettings<TModel> _currentSettings;
 
-  FeedItemReferenceManager(this.db);
+  int currentPage = 0;
+  String terms = '';
+  bool _isDisposed = false;
+  final Logger _logger = Logger('SearchStreamNotifier');
 
-  /// Clears all items for the given [feedKey] and inserts/updates the new [items]
-  /// ensuring their display_order is set according to their position in the list.
-  Future<void> setFeedItems({
-    required String feedKey,
-    required List<FeedItemReference> items,
-  }) async {
-    await db.writeTransaction((tx) async {
-      // It's often still useful to clear items not present in the new list.
-      // If items can only be added/reordered but not removed by this operation,
-      // you might reconsider this delete. For a full "set", this delete is common.
-      await tx.execute('DELETE FROM $_tableName WHERE feed_key = ?', [feedKey]);
-      for (int i = 0; i < items.length; i++) {
-        final item = items[i];
-        // UPSERT: Insert the item or update its display_order if it already exists
-        // (though with the preceding DELETE, it will always be an INSERT here unless
-        // items list has duplicates for the same item_source_id/table for this feedKey).
-        await tx.execute(
-          '''INSERT INTO $_tableName (feed_key, item_source_table, item_source_id, display_order)
-          VALUES (?, ?, ?, ?)
-          ON CONFLICT(feed_key, item_source_table, item_source_id) DO UPDATE SET
-            display_order = excluded.display_order''',
-          [feedKey, item.itemSourceTable, item.itemSourceId, i],
-        );
-      }
-    });
+  // For dynamic filters applied on top of queryCustomizer
+  ClientManagerFilterBuilder<TModel> Function(
+    ClientManagerFilterBuilder<TModel> query,
+  )?
+  _dynamicFilterApplicator;
+
+  FeedStreamNotifier() {
+    // Initialization in build
   }
 
-  /// Adds a list of items to the start of the specified feed.
-  /// All items in the feed (new and existing) will be renumbered sequentially starting from 0.
-  /// The `displayOrder` property of the [newItemsToAdd] is ignored.
-  Future<void> addItemsToStart({
-    required String feedKey,
-    required List<FeedItemReference> newItemsToAdd,
-  }) async {
-    if (newItemsToAdd.isEmpty) {
+  ClientManagerFilterBuilder<TModel> _getEffectiveQueryBuilder() {
+    // 1. Start with the absolute base query from settings
+    var query = _currentSettings.clientManager.query().select(
+      _currentSettings.selectArgs,
+    );
+
+    // 2. Apply the "base query modifications" (static customizer) from settings
+    if (_currentSettings.queryCustomizer != null) {
+      query = _currentSettings.queryCustomizer!(query);
+    }
+
+    // 3. Apply dynamic filters if any are set
+    if (_dynamicFilterApplicator != null) {
+      query = _dynamicFilterApplicator!(query);
+    }
+
+    // 4. Apply search terms if search is configured and terms are present
+    if (_currentSettings.searchColumn != null && terms.isNotEmpty) {
+      query = query.textSearch(_currentSettings.searchColumn!, terms);
+    }
+    return query;
+  }
+
+  // Helper to get the query structure for feedStream's JSON sub-select
+  ClientManagerFilterBuilder<TModel> _getBaseQueryForFeedStreamSchema() {
+    var baseQuery = _currentSettings.clientManager.query().select(
+      _currentSettings.selectArgs,
+    );
+    if (_currentSettings.queryCustomizer != null) {
+      baseQuery = _currentSettings.queryCustomizer!(baseQuery);
+    }
+    return baseQuery;
+  }
+
+  @override
+  Stream<List<TModel>> build(FeedStreamNotifierSettings<TModel> arg) async* {
+    _currentSettings = arg;
+    currentPage = 0;
+    terms = '';
+    _dynamicFilterApplicator = null; // Reset dynamic filters
+    _isDisposed = false;
+
+    ref.onDispose(() {
+      _isDisposed = true;
+    });
+
+    final count = await _getCount();
+    if (_isDisposed) return;
+
+    if (count == 0) {
+      await refreshFeed(initialize: true);
+    } else {
+      await refreshFeed();
+    }
+    if (_isDisposed) return;
+
+    yield* feedStream;
+  }
+
+  Stream<List<TModel>> get feedStream async* {
+    final appDatabase = ref.watch(databaseProvider).value!;
+    final sqliteDb = appDatabase.db as SqliteDatabase;
+
+    // Use the base query (with static customizer) for determining table name and selector for SQL
+    final baseQueryForSchema = _getBaseQueryForFeedStreamSchema();
+    final modelTableName = baseQueryForSchema.tableName;
+    final SupabaseSelectBuilderBase? selector =
+        baseQueryForSchema.selectorStatement;
+
+    if (selector == null) {
+      _logger.severe(
+        "SearchStreamNotifier: selectorStatement is null in feedStream for ${modelTableName}. This indicates a setup error with base query.",
+      );
+      yield <TModel>[];
       return;
     }
 
-    await db.writeTransaction((tx) async {
-      // 1. Get current items' identifiers, ordered by their current display_order.
-      // We only need itemSourceTable and itemSourceId to identify them.
-      final existingItemsRaw = await tx.execute(
-        'SELECT item_source_table, item_source_id FROM $_tableName WHERE feed_key = ? ORDER BY display_order ASC',
-        [feedKey],
+    final SqlStatement jsonSelectSubQueryStatement =
+        selector.buildSelectWithNestedData();
+
+    if (selector.currentTableInfo.primaryKeys.isEmpty) {
+      _logger.severe(
+        "SearchStreamNotifier: Table ${selector.currentTableInfo.originalName} has no primary keys defined. Cannot build feedStream SQL.",
       );
-      final List<FeedItemReference> existingItems =
-          existingItemsRaw
-              .map(
-                (row) => FeedItemReference(
-                  itemSourceTable: row['item_source_table'] as String,
-                  itemSourceId: row['item_source_id'] as String,
-                  displayOrder:
-                      0, // This displayOrder is a placeholder, it will be reassigned.
-                ),
-              )
-              .toList();
-
-      // 2. Create the new combined list.
-      // New items come first. Existing items are added if not already included from newItemsToAdd
-      // (this handles moving an existing item to the start).
-      final List<FeedItemReference> combinedList = [];
-      final Set<String> addedItemUniqueKeys =
-          {}; // To track "table:id" to prevent duplicates
-
-      for (final item in newItemsToAdd) {
-        final uniqueKey = "${item.itemSourceTable}:${item.itemSourceId}";
-        // We add all newItemsToAdd, their position at the start is guaranteed.
-        // If a new item is a duplicate of another new item, both will be added here,
-        // and the last one's position will be based on its order in newItemsToAdd.
-        // The final INSERT loop will assign display_order based on this combinedList.
-        combinedList.add(
-          FeedItemReference(
-            itemSourceTable: item.itemSourceTable,
-            itemSourceId: item.itemSourceId,
-            displayOrder: 0,
-          ),
-        ); // Placeholder displayOrder
-        addedItemUniqueKeys.add(uniqueKey);
-      }
-
-      for (final item in existingItems) {
-        final uniqueKey = "${item.itemSourceTable}:${item.itemSourceId}";
-        if (!addedItemUniqueKeys.contains(uniqueKey)) {
-          combinedList.add(
-            FeedItemReference(
-              itemSourceTable: item.itemSourceTable,
-              itemSourceId: item.itemSourceId,
-              displayOrder: 0,
-            ),
-          ); // Placeholder displayOrder
-        }
-      }
-
-      // 3. Clear all existing items for this feedKey (within the transaction).
-      await tx.execute('DELETE FROM $_tableName WHERE feed_key = ?', [feedKey]);
-
-      // 4. Insert all items from the combined list with new, sequential display_order.
-      // Since we've deleted all items for this feedKey and combinedList ensures uniqueness
-      // of (itemSourceTable, itemSourceId) by how it's constructed, a simple INSERT is sufficient.
-      // If combinedList could have internal duplicates, an UPSERT would be needed here.
-      for (int i = 0; i < combinedList.length; i++) {
-        final itemToInsert = combinedList[i];
-        await tx.execute(
-          '''INSERT INTO $_tableName (feed_key, item_source_table, item_source_id, display_order)
-             VALUES (?, ?, ?, ?)''',
-          [
-            feedKey,
-            itemToInsert.itemSourceTable,
-            itemToInsert.itemSourceId,
-            i, // New sequential display_order
-          ],
-        );
-      }
-    });
-  }
-
-  /// Adds a single item to the end of the specified feed.
-  /// If the item already exists in the feed, its display_order will be updated to move it to the end.
-  Future<void> addItemToEnd({
-    required String feedKey,
-    required String itemSourceTable,
-    required String itemSourceId,
-  }) async {
-    await db.writeTransaction((tx) async {
-      final maxOrderResult = await tx.execute(
-        'SELECT MAX(display_order) as max_order FROM $_tableName WHERE feed_key = ?',
-        [feedKey],
-      );
-      final maxOrder =
-          (maxOrderResult.isNotEmpty
-              ? maxOrderResult.first['max_order'] as int?
-              : null) ??
-          -1;
-      // UPSERT: Insert the item or update its display_order if it already exists.
-      await tx.execute(
-        '''INSERT INTO $_tableName (feed_key, item_source_table, item_source_id, display_order)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(feed_key, item_source_table, item_source_id) DO UPDATE SET
-          display_order = excluded.display_order''',
-        [feedKey, itemSourceTable, itemSourceId, maxOrder + 1],
-      );
-    });
-  }
-
-  /// Adds a list of items to the end of the specified feed.
-  /// All items in the feed (new and existing) will be renumbered sequentially.
-  /// The `displayOrder` property of the [itemsToAdd] is ignored.
-  Future<void> addItemsToEnd({
-    required String feedKey,
-    required List<FeedItemReference> itemsToAdd,
-  }) async {
-    if (itemsToAdd.isEmpty) {
+      yield <TModel>[];
       return;
     }
+    final String modelPrimaryKeyCol =
+        selector.currentTableInfo.primaryKeys.first.originalName;
+    final String aliasInSubQuery =
+        jsonSelectSubQueryStatement.fromAlias ?? 't_fallback';
 
-    await db.writeTransaction((tx) async {
-      // 1. Get current items' identifiers, ordered by their current display_order.
-      final existingItemsRaw = await tx.execute(
-        'SELECT item_source_table, item_source_id FROM $_tableName WHERE feed_key = ? ORDER BY display_order ASC',
-        [feedKey],
-      );
-      final List<FeedItemReference> existingItems =
-          existingItemsRaw
-              .map(
-                (row) => FeedItemReference(
-                  itemSourceTable: row['item_source_table'] as String,
-                  itemSourceId: row['item_source_id'] as String,
-                  displayOrder: 0, // Placeholder, will be reassigned
-                ),
-              )
-              .toList();
+    final sql = '''
+      SELECT
+        fir.id AS feed_item_ref_id,
+        fir.feed_key,
+        fir.item_source_table,
+        fir.item_source_id,
+        fir.display_order,
+        CASE
+            WHEN fir.item_source_table = ? THEN (
+                SELECT ${jsonSelectSubQueryStatement.selectColumns}
+                FROM "${jsonSelectSubQueryStatement.tableName}" AS "$aliasInSubQuery"
+                WHERE "$aliasInSubQuery"."$modelPrimaryKeyCol" = fir.item_source_id
+            )
+            ELSE NULL
+        END AS item_json_data
+      FROM
+        feed_item_references fir
+      WHERE
+        fir.feed_key = ?
+      ORDER BY
+        fir.display_order ASC;
+    ''';
 
-      // 2. Create the new combined list.
-      // Existing items come first, unless they are also in itemsToAdd (in which case they'll be "moved" to the end).
-      // New items are added at the end.
-      final List<FeedItemReference> combinedList = [];
-      final Set<String> itemsToAddUniqueKeys =
-          itemsToAdd
-              .map((item) => "${item.itemSourceTable}:${item.itemSourceId}")
-              .toSet();
+    yield* sqliteDb.watch(sql, parameters: [modelTableName, _currentSettings.feedKey]).map<
+      List<TModel>
+    >((ResultSet rawData) {
+      // Explicit type for map's T and rawData
+      if (_isDisposed) return <TModel>[];
+      return rawData
+          .map((row) {
+            final jsonData = row['item_json_data'];
+            if (jsonData == null) return null;
 
-      // Add existing items that are NOT in the new itemsToAdd list
-      for (final item in existingItems) {
-        final uniqueKey = "${item.itemSourceTable}:${item.itemSourceId}";
-        if (!itemsToAddUniqueKeys.contains(uniqueKey)) {
-          combinedList.add(
-            FeedItemReference(
-              itemSourceTable: item.itemSourceTable,
-              itemSourceId: item.itemSourceId,
-              displayOrder: 0,
-            ),
-          ); // Placeholder
-        }
-      }
-
-      // Add all new items (this also handles "moving" existing items if they are in itemsToAdd)
-      for (final item in itemsToAdd) {
-        combinedList.add(
-          FeedItemReference(
-            itemSourceTable: item.itemSourceTable,
-            itemSourceId: item.itemSourceId,
-            displayOrder: 0,
-          ),
-        ); // Placeholder
-      }
-
-      // 3. Clear all existing items for this feedKey (within the transaction).
-      await tx.execute('DELETE FROM $_tableName WHERE feed_key = ?', [feedKey]);
-
-      // 4. Insert all items from the combined list with new, sequential display_order.
-      for (int i = 0; i < combinedList.length; i++) {
-        final itemToInsert = combinedList[i];
-        await tx.execute(
-          '''INSERT INTO $_tableName (feed_key, item_source_table, item_source_id, display_order)
-             VALUES (?, ?, ?, ?)''',
-          [
-            feedKey,
-            itemToInsert.itemSourceTable,
-            itemToInsert.itemSourceId,
-            i, // New sequential display_order
-          ],
-        );
-      }
+            Map<String, dynamic> parsedJson;
+            if (jsonData is String) {
+              try {
+                parsedJson = jsonDecode(jsonData) as Map<String, dynamic>;
+              } catch (e) {
+                _logger.warning(
+                  'SearchStreamNotifier: JSONDecode error for item_json_data: $e, data: $jsonData',
+                );
+                return null;
+              }
+            } else if (jsonData is Map<String, dynamic>) {
+              parsedJson = jsonData;
+            } else {
+              _logger.warning(
+                'SearchStreamNotifier: Unexpected format for item_json_data: ${jsonData.runtimeType}',
+              );
+              return null;
+            }
+            try {
+              return _currentSettings.fromJsonFactory(parsedJson);
+            } catch (e) {
+              _logger.severe(
+                'SearchStreamNotifier: Error in fromJsonFactory for $modelTableName: $e, json: $parsedJson',
+              );
+              return null;
+            }
+          })
+          .whereType<TModel>()
+          .toList();
     });
   }
 
-  /// Removes a specific item from the feed. Note: This does NOT automatically re-compact display_order values.
-  Future<void> removeItem({
-    required String feedKey,
-    required String itemSourceTable,
-    required String itemSourceId,
-  }) async {
-    await db.execute(
-      'DELETE FROM $_tableName WHERE feed_key = ? AND item_source_table = ? AND item_source_id = ?',
-      [feedKey, itemSourceTable, itemSourceId],
-    );
+  Future<int> _getCount() async {
+    final feedManager = ref.read(feedItemReferenceManagerProvider);
+    return await feedManager.getCount(feedKey: _currentSettings.feedKey);
   }
 
-  /// Removes all items from the specified feed.
-  Future<void> clearFeed({required String feedKey}) async {
-    await db.execute('DELETE FROM $_tableName WHERE feed_key = ?', [feedKey]);
-  }
+  Future<void> refreshFeed({bool initialize = false}) async {
+    try {
+      _logger.info(
+        'refreshFeed called. initialize: $initialize, current terms: "$terms", dynamicFiltersSet: ${_dynamicFilterApplicator != null}',
+      );
 
-  /// Gets the total count of items for a given feed.
-  Future<int> getCount({required String feedKey}) async {
-    final result = await db.execute(
-      'SELECT COUNT(*) as count FROM $_tableName WHERE feed_key = ?',
-      [feedKey],
-    );
-    if (result.isNotEmpty) {
-      return result.first['count'] as int? ?? 0;
+      // _fetch will use _getEffectiveQueryBuilder()
+      final items = await _fetch(
+        rangeStart: 0,
+        rangeEnd: _currentSettings.pageSize - 1,
+      );
+
+      if (_isDisposed) return;
+
+      final feedManager = ref.read(feedItemReferenceManagerProvider);
+      final feedKey = _currentSettings.feedKey;
+      final effectiveQuery = _getEffectiveQueryBuilder(); // To get tableName
+
+      if (initialize) {
+        await feedManager.clearFeed(feedKey: feedKey);
+        if (_isDisposed) return;
+        await feedManager.setFeedItems(
+          feedKey: feedKey,
+          items:
+              items
+                  .asMap()
+                  .entries
+                  .map(
+                    (e) => FeedItemReference(
+                      itemSourceTable:
+                          effectiveQuery
+                              .tableName, // Use effective query's table
+                      itemSourceId: e.value.localId,
+                      displayOrder: e.key,
+                    ),
+                  )
+                  .toList(),
+        );
+      } else {
+        // addItemsToStart might not be the right behavior if filters change.
+        // Consider if 'initialize: true' should always be used when filters or search terms change.
+        // For now, keeping existing logic.
+        await feedManager.addItemsToStart(
+          feedKey: feedKey,
+          newItemsToAdd:
+              items
+                  .asMap()
+                  .entries
+                  .map(
+                    (e) => FeedItemReference(
+                      itemSourceTable:
+                          effectiveQuery
+                              .tableName, // Use effective query's table
+                      itemSourceId: e.value.localId,
+                      displayOrder: e.key,
+                    ),
+                  )
+                  .toList(),
+        );
+      }
+      if (_isDisposed) return;
+      currentPage = 0;
+    } catch (e, s) {
+      if (!_isDisposed) {
+        state = AsyncValue.error(e, s);
+      } else {
+        _logger.warning(
+          "SearchStreamNotifier: Error in refreshFeed but unmounted: $e",
+        );
+      }
     }
-    return 0;
   }
 
-  /// Retrieves all item references for a given feed, ordered by their display_order.
-  Future<List<FeedItemReference>> getFeedItemReferences({
-    required String feedKey,
-  }) async {
-    final results = await db.execute(
-      'SELECT item_source_table, item_source_id, display_order FROM $_tableName WHERE feed_key = ? ORDER BY display_order ASC',
-      [feedKey],
+  Future<void> fetchMoreItems() async {
+    final nextPage = currentPage + 1;
+    try {
+      final rangeStart = nextPage * _currentSettings.pageSize;
+      final rangeEnd = ((nextPage + 1) * _currentSettings.pageSize) - 1;
+      // _fetch will use _getEffectiveQueryBuilder()
+      final newItems = await _fetch(rangeStart: rangeStart, rangeEnd: rangeEnd);
+
+      if (_isDisposed) return;
+
+      if (newItems.isNotEmpty) {
+        final feedManager = ref.read(feedItemReferenceManagerProvider);
+        final effectiveQuery = _getEffectiveQueryBuilder(); // To get tableName
+        await feedManager.addItemsToEnd(
+          feedKey: _currentSettings.feedKey,
+          itemsToAdd:
+              newItems
+                  .map(
+                    (item) => FeedItemReference(
+                      itemSourceTable:
+                          effectiveQuery
+                              .tableName, // Use effective query's table
+                      itemSourceId: item.localId,
+                      // displayOrder for addItemsToEnd is handled by the manager
+                      displayOrder: -1, // Or let manager handle it
+                    ),
+                  )
+                  .toList(),
+        );
+        if (_isDisposed) return;
+        currentPage = nextPage;
+      }
+    } catch (e, s) {
+      if (!_isDisposed) {
+        state = AsyncValue.error(e, s);
+      } else {
+        _logger.warning(
+          "SearchStreamNotifier: Error in fetchMoreItems but unmounted: $e",
+        );
+      }
+    }
+  }
+
+  Future<List<TModel>> _fetch({int rangeStart = 0, int rangeEnd = 20}) async {
+    final effectiveQuery = _getEffectiveQueryBuilder();
+    // The textSearch is now part of _getEffectiveQueryBuilder if terms are set
+    return await effectiveQuery.range(rangeStart, rangeEnd).remoteOnly();
+  }
+
+  Future<void> search(String newTerms) async {
+    if (_currentSettings.searchColumn == null && newTerms.isNotEmpty) {
+      _logger.warning(
+        "SearchStreamNotifier: Search initiated for '$newTerms' but no searchColumn is configured for feedKey '${_currentSettings.feedKey}'.",
+      );
+      // Optionally, clear terms if search is not supported
+      // terms = '';
+      // return; // Or proceed to refresh without search
+    }
+    if (_currentSettings.searchColumn == null &&
+        newTerms.isEmpty &&
+        terms.isEmpty) {
+      // If search isn't configured and both new and old terms are empty, no need to refresh if only terms changed.
+      // However, if other filters might have changed, a refresh might still be desired.
+      // For simplicity, we'll proceed with refresh, as `refreshFeed` handles the effective query.
+    }
+
+    terms = newTerms;
+    currentPage = 0;
+    await refreshFeed(initialize: true);
+  }
+
+  /// Applies a new set of dynamic filters to the feed.
+  /// The [filterApplicator] function takes the current base query (after static customizers)
+  /// and should return a new query with the dynamic filters applied.
+  Future<void> applyDynamicFilters(
+    ClientManagerFilterBuilder<TModel> Function(
+      ClientManagerFilterBuilder<TModel> baseQueryWithoutDynamicFilters,
+    )
+    filterApplicator,
+  ) async {
+    _logger.info(
+      "Applying dynamic filters for feedKey '${_currentSettings.feedKey}'.",
     );
-    return results.map((map) => FeedItemReference.fromMap(map)).toList();
+    _dynamicFilterApplicator = filterApplicator;
+    currentPage = 0;
+    // It's usually best to re-initialize the feed when filters change significantly.
+    // Also, consider if search terms should be cleared or maintained.
+    // For now, maintaining search terms.
+    await refreshFeed(initialize: true);
+  }
+
+  /// Clears any previously applied dynamic filters, reverting to the base query
+  /// (which includes the static queryCustomizer from settings).
+  Future<void> clearDynamicFilters() async {
+    if (_dynamicFilterApplicator != null) {
+      _logger.info(
+        "Clearing dynamic filters for feedKey '${_currentSettings.feedKey}'.",
+      );
+      _dynamicFilterApplicator = null;
+      currentPage = 0;
+      // Also consider if search terms should be cleared.
+      await refreshFeed(initialize: true);
+    } else {
+      _logger.info(
+        "No dynamic filters to clear for feedKey '${_currentSettings.feedKey}'.",
+      );
+    }
   }
 }
 
-final feedItemReferenceManagerProvider = Provider<FeedItemReferenceManager>((
-  ref,
-) {
-  final database = ref.watch(databaseProvider).requireValue;
-  return FeedItemReferenceManager(database.db);
-});
+
 
 
 

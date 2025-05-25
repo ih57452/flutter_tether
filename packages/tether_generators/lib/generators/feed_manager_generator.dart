@@ -24,7 +24,6 @@ class FeedManagerGenerator {
 
     final className = 'FeedItemReferenceManager';
     final providerName = 'feedItemReferenceManagerProvider';
-    final tableNameInManager = 'feed_item_references';
 
     final buffer = StringBuffer();
     buffer.writeln('// GENERATED CODE - DO NOT MODIFY BY HAND');

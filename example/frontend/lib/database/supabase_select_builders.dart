@@ -3,7 +3,7 @@
 
 // ignore_for_file: type_init_formals
 
-import 'package:tether/schema/supabase_select_builder_base.dart';
+import 'package:tether_libs/models/supabase_select_builder_base.dart';
 import 'supabase_schema.dart'; // Import the generated schema
 
 enum BookstoresColumn implements SupabaseColumn {
@@ -57,7 +57,7 @@ class BookstoresSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  BookstoresSelectBuilder withBookstoreBooks([BookstoreBooksSelectBuilder? builder]) {
+  BookstoresSelectBuilder withBookstoreBooks(BookstoreBooksSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? BookstoreBooksSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -65,7 +65,8 @@ class BookstoresSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'bookstoreBooks',
         fkConstraintName: 'bookstore_books_bookstore_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
@@ -125,7 +126,7 @@ class AuthorsSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  AuthorsSelectBuilder withBooks([BooksSelectBuilder? builder]) {
+  AuthorsSelectBuilder withBooks(BooksSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? BooksSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -133,7 +134,8 @@ class AuthorsSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'books',
         fkConstraintName: 'books_author_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
@@ -189,7 +191,7 @@ class GenresSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  GenresSelectBuilder withBookGenres([BookGenresSelectBuilder? builder]) {
+  GenresSelectBuilder withBookGenres(BookGenresSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? BookGenresSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -197,7 +199,8 @@ class GenresSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'bookGenres',
         fkConstraintName: 'book_genres_genre_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
@@ -253,7 +256,7 @@ class ImagesSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  ImagesSelectBuilder withBannerImages([BooksSelectBuilder? builder]) {
+  ImagesSelectBuilder withBannerImages(BooksSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? BooksSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -261,11 +264,12 @@ class ImagesSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'bannerImages',
         fkConstraintName: 'books_banner_image_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
-  ImagesSelectBuilder withCoverImages([BooksSelectBuilder? builder]) {
+  ImagesSelectBuilder withCoverImages(BooksSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? BooksSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -273,7 +277,8 @@ class ImagesSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'coverImages',
         fkConstraintName: 'books_cover_image_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
@@ -338,7 +343,7 @@ class BooksSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  BooksSelectBuilder withAuthor([AuthorsSelectBuilder? builder]) {
+  BooksSelectBuilder withAuthor(AuthorsSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? AuthorsSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -346,11 +351,12 @@ class BooksSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'author',
         fkConstraintName: 'books_author_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
-  BooksSelectBuilder withBannerImage([ImagesSelectBuilder? builder]) {
+  BooksSelectBuilder withBannerImage(ImagesSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? ImagesSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -358,11 +364,12 @@ class BooksSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'bannerImage',
         fkConstraintName: 'books_banner_image_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
-  BooksSelectBuilder withCoverImage([ImagesSelectBuilder? builder]) {
+  BooksSelectBuilder withCoverImage(ImagesSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? ImagesSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -370,11 +377,12 @@ class BooksSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'coverImage',
         fkConstraintName: 'books_cover_image_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
-  BooksSelectBuilder withBookGenres([BookGenresSelectBuilder? builder]) {
+  BooksSelectBuilder withBookGenres(BookGenresSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? BookGenresSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -382,11 +390,12 @@ class BooksSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'bookGenres',
         fkConstraintName: 'book_genres_book_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
-  BooksSelectBuilder withBookstoreBooks([BookstoreBooksSelectBuilder? builder]) {
+  BooksSelectBuilder withBookstoreBooks(BookstoreBooksSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? BookstoreBooksSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -394,7 +403,8 @@ class BooksSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'bookstoreBooks',
         fkConstraintName: 'bookstore_books_book_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
@@ -448,7 +458,7 @@ class BookGenresSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  BookGenresSelectBuilder withBook([BooksSelectBuilder? builder]) {
+  BookGenresSelectBuilder withBook(BooksSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? BooksSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -456,11 +466,12 @@ class BookGenresSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'book',
         fkConstraintName: 'book_genres_book_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
-  BookGenresSelectBuilder withGenre([GenresSelectBuilder? builder]) {
+  BookGenresSelectBuilder withGenre(GenresSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? GenresSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -468,7 +479,8 @@ class BookGenresSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'genre',
         fkConstraintName: 'book_genres_genre_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
@@ -522,7 +534,7 @@ class BookstoreBooksSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  BookstoreBooksSelectBuilder withBook([BooksSelectBuilder? builder]) {
+  BookstoreBooksSelectBuilder withBook(BooksSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? BooksSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -530,11 +542,12 @@ class BookstoreBooksSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'book',
         fkConstraintName: 'bookstore_books_book_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 
-  BookstoreBooksSelectBuilder withBookstore([BookstoresSelectBuilder? builder]) {
+  BookstoreBooksSelectBuilder withBookstore(BookstoresSelectBuilder? builder, {bool innerJoin = false}) {
     final finalBuilder = builder ?? BookstoresSelectBuilder();
     if (builder == null) {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
@@ -542,7 +555,8 @@ class BookstoreBooksSelectBuilder extends SupabaseSelectBuilderBase {
     addSupabaseRelated(
         jsonKey: 'bookstore',
         fkConstraintName: 'bookstore_books_bookstore_id_fkey',
-        nestedBuilder: finalBuilder);
+        nestedBuilder: finalBuilder,
+        innerJoin: innerJoin);
     return this;
   }
 

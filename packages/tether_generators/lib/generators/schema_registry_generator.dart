@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:tether_generators/config/config_model.dart';
-import 'package:tether_libs/schema/table_info.dart';
+import 'package:tether_libs/models/table_info.dart';
 import 'package:tether_libs/utils/logger.dart';
 
 class SchemaRegistryGenerator {
@@ -43,16 +43,16 @@ class SchemaRegistryGenerator {
 
     // File Header & Imports
     sb.writeln('// GENERATED CODE - DO NOT MODIFY BY HAND');
-    sb.writeln(
-      '// Schema registry mapping between Supabase and Drift columns.',
-    );
+    sb.writeln('// ignore_for_file: constant_identifier_names');
     sb.writeln();
     sb.writeln("import 'package:drift/drift.dart';");
-    sb.writeln("import 'package:tether/schema/schema_registry.dart';");
-    sb.writeln("import 'package:tether/schema/schema_registry_base.dart';");
-    sb.writeln("import 'package:tether/schema/select_statement.dart';");
+    sb.writeln("import 'package:tether_libs/models/schema_registry.dart';");
     sb.writeln(
-      "import 'package:tether/supabase_builder/supabase_select_builder_base.dart';",
+      "import 'package:tether_libs/models/schema_registry_base.dart';",
+    );
+    sb.writeln("import 'package:tether_libs/models/select_statement.dart';");
+    sb.writeln(
+      "import 'package:tether_libs/models/supabase_select_builder_base.dart';",
     );
 
     // Import your database class

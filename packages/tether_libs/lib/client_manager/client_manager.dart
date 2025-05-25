@@ -1,9 +1,9 @@
 import 'package:sqlite_async/sqlite_async.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tether_libs/schema/table_info.dart';
+import 'package:tether_libs/models/tether_model.dart';
+import 'package:tether_libs/models/table_info.dart';
 import 'client_manager_models.dart';
 import 'client_manager_query_builder.dart';
-import '../models/tether_model.dart';
 
 class ClientManager<TModel extends TetherModel<TModel>> {
   final String tableName;

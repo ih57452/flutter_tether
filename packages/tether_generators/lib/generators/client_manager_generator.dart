@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:inflection3/inflection3.dart';
 import 'package:recase/recase.dart';
 import 'package:tether_generators/config/config_model.dart';
-import 'package:tether_libs/schema/table_info.dart';
+import 'package:tether_libs/models/table_info.dart';
 import 'package:tether_libs/utils/string_utils.dart';
 import 'package:path/path.dart' as p; // Import the path package
 
@@ -36,8 +36,7 @@ Future<void> generateClientManagers({
 // ignore_for_file: constant_identifier_names
 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tether/schema/supabase_select_builder_base.dart';
-import 'package:tether/client_manager/client_manager.dart';
+import 'package:tether_libs/client_manager/client_manager.dart';
 import '../${config.modelsFileName}'; // Assumes models.dart is in outputDirectory
 import '../database.dart'; // Assumes database.dart is in outputDirectory
 import '../$schemaFileName'; // Corrected relative import for schema file
@@ -46,7 +45,7 @@ import '../$schemaFileName'; // Corrected relative import for schema file
     if (config.useRiverpod) {
       buffer.writeln('''
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/search_feed_provider.dart';
+import '../providers/feed_provider.dart';
 ''');
     } else {
       buffer.writeln('''
@@ -85,15 +84,15 @@ final $providerName = Provider<$className>((ref) {
   );
 });
 
-final ${table.localName.camelCase}SearchFeedProvider = StreamNotifierProvider.autoDispose.family<
-  SearchStreamNotifier<$modelClassName>, // NotifierT: Your notifier class
+final ${table.localName.camelCase}FeedProvider = StreamNotifierProvider.autoDispose.family<
+  FeedStreamNotifier<$modelClassName>, // NotifierT: Your notifier class
   List<$modelClassName>, // StateT: The type of data the stream emits
-  SearchStreamNotifierSettings<
+  FeedStreamNotifierSettings<
     $modelClassName
   > // ArgT: The type of the settings argument
 >(() {
   // Instantiate the notifier and return it
-  return SearchStreamNotifier<$modelClassName>();
+  return FeedStreamNotifier<$modelClassName>();
 });
 ''');
     } else {

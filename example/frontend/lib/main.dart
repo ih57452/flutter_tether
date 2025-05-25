@@ -1,10 +1,11 @@
 // import 'package:example/database/supabase_select_builders.dart';
 
+import 'package:example/ui/tabs/feed_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:example/database/database.dart';
-import 'package:example/ui/tabs/feed_tab.dart';
+import 'package:example/ui/tabs/search_feed_tab.dart';
 import 'package:example/ui/tabs/crud_tab.dart';
 
 Future<void> main() async {
@@ -72,6 +73,7 @@ class _DemoHomePageState extends State<DemoHomePage>
   late TabController _tabController;
 
   final List<Tab> _tabs = <Tab>[
+    const Tab(text: 'Search', icon: Icon(Icons.search)),
     const Tab(text: 'Feed', icon: Icon(Icons.list_alt)),
     const Tab(text: 'CRUD', icon: Icon(Icons.edit_document)),
     // Add more tabs here
@@ -80,6 +82,7 @@ class _DemoHomePageState extends State<DemoHomePage>
   ];
 
   final List<Widget> _tabViews = <Widget>[
+    const SearchFeedTab(),
     const FeedTab(),
     const CrudTab(),
     // Add more tab views here

@@ -1,9 +1,9 @@
-import 'package:logging/logging.dart'; // Import logger
+import 'package:logging/logging.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tether_libs/models/supabase_select_builder_base.dart';
+import 'package:tether_libs/models/tether_model.dart';
 import 'client_manager_models.dart';
 import 'client_manager_transform_builder.dart';
-import '../models/supabase_select_builder_base.dart';
-import '../models/tether_model.dart';
 
 class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
     extends ClientManagerTransformBuilder<TModel> {

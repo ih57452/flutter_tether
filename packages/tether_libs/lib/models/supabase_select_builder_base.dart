@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
-import 'package:tether_libs/schema/table_info.dart';
-import '../client_manager/client_manager_models.dart';
+import 'package:tether_libs/client_manager/client_manager_models.dart';
+import 'package:tether_libs/models/table_info.dart';
 
 // The generator will add the correct import to the generated
 // supabase_select_builders.dart file.
@@ -16,8 +16,13 @@ class RelatedBuilderLink {
   final SupabaseSelectBuilderBase builder;
   final String
   fkConstraintName; // The FK constraint name that establishes this link
+  final bool innerJoin; // Renamed from performInnerJoin
 
-  RelatedBuilderLink({required this.builder, required this.fkConstraintName});
+  RelatedBuilderLink({
+    required this.builder,
+    required this.fkConstraintName,
+    this.innerJoin = false, // Renamed and default to false
+  });
 }
 
 /// Interface for column enums in generated Supabase builders
@@ -103,6 +108,7 @@ abstract class SupabaseSelectBuilderBase {
     required String
     fkConstraintName, // The name of the FK constraint that establishes this link
     required SupabaseSelectBuilderBase nestedBuilder,
+    bool innerJoin = false, // Renamed parameter
   }) {
     if (supabaseRelatedBuilders.containsKey(jsonKey)) {
       _logger.warning(
@@ -112,12 +118,11 @@ abstract class SupabaseSelectBuilderBase {
     supabaseRelatedBuilders[jsonKey] = RelatedBuilderLink(
       builder: nestedBuilder,
       fkConstraintName: fkConstraintName,
+      innerJoin: innerJoin, // Store the renamed flag
     );
   }
 
   /// Builds the Supabase-specific select string.
-  /// This needs careful review if it's intended to produce Supabase-compatible select strings,
-  /// as its logic for handling related selectors is now different.
   String buildSupabase() {
     final List<String> parts = [];
     if (selectAllPrimary) {
@@ -127,20 +132,44 @@ abstract class SupabaseSelectBuilderBase {
     } else {
       // PostgREST requires at least one column or '*' from the primary table
       // if you are embedding related resources.
-      parts.add('*');
+      // If no columns are selected and no relations are added, PostgREST might error.
+      // Defaulting to '*' if relations exist but no primary columns are selected.
+      if (supabaseRelatedBuilders.isNotEmpty) {
+        parts.add('*');
+      } else {
+        // If no relations and no columns, this might be an invalid select.
+        // However, PostgREST might default to selecting primary keys if available.
+        // For safety, if nothing is selected, and no relations, select PKs or '*'
+        // For now, let's stick to '*' if relations exist, otherwise this part needs more thought
+        // on what to do if selectedPrimaryColumns is empty AND supabaseRelatedBuilders is empty.
+        // A common Supabase client behavior is to select all if nothing is specified.
+        // Let's assume if selectedPrimaryColumns is empty and no relations, it implies '*' for the base table.
+        // This might need adjustment based on desired default behavior.
+        // For now, if parts is empty, it means neither selectAllPrimary nor selectedPrimaryColumns had items.
+        // If there are related builders, we MUST select something from primary.
+        // If no related builders and no selections, it's ambiguous.
+        // Let's default to '*' if nothing else is specified.
+        if (parts.isEmpty) {
+          parts.add(
+            '*',
+          ); // Default to selecting all from the current table if nothing else specified
+        }
+      }
     }
 
     // Group related builders by their target table name to detect
     // if PostgREST needs disambiguation for the relationship_specifier part.
-    final Map<String, List<MapEntry<String, RelatedBuilderLink>>>
-    groupedByTargetTableForDisambiguation = {};
+    // This grouping was for a more complex disambiguation strategy which might not be fully needed
+    // if we use fkConstraintName directly in the specifier.
+    // final Map<String, List<MapEntry<String, RelatedBuilderLink>>>
+    // groupedByTargetTableForDisambiguation = {};
 
-    for (final entry in supabaseRelatedBuilders.entries) {
-      final targetTableName = entry.value.builder.currentTableInfo.originalName;
-      (groupedByTargetTableForDisambiguation[targetTableName] ??= []).add(
-        entry,
-      );
-    }
+    // for (final entry in supabaseRelatedBuilders.entries) {
+    //   final targetTableName = entry.value.builder.currentTableInfo.originalName;
+    //   (groupedByTargetTableForDisambiguation[targetTableName] ??= []).add(
+    //     entry,
+    //   );
+    // }
 
     // Now, iterate through the original supabaseRelatedBuilders to maintain order
     // and use the jsonKey as the alias.
@@ -148,11 +177,32 @@ abstract class SupabaseSelectBuilderBase {
       final targetTableName = relatedLink.builder.currentTableInfo.originalName;
       final fkConstraintName = relatedLink.fkConstraintName;
       final nestedSelect = relatedLink.builder.buildSupabase();
+      final useInnerJoin = relatedLink.innerJoin; // Renamed variable
 
+      // Determine the relationship specifier.
+      // For simple FKs, PostgREST can often infer from table names if unambiguous.
+      // Using the FK constraint name is more explicit and robust.
+      // Format: target_table!fk_constraint_name
       String relationshipSpecifier = '$targetTableName!$fkConstraintName';
+      if (useInnerJoin) {
+        // Renamed variable
+        relationshipSpecifier = '$relationshipSpecifier!inner';
+      }
 
       // Format: jsonKey:relationship_specifier(nested_select)
-      parts.add('$jsonKey:$relationshipSpecifier($nestedSelect)');
+      // If nestedSelect is empty (e.g. selecting only from a related table with no further nesting or specific columns)
+      // PostgREST might expect just "jsonKey:relationship_specifier" if the nested part is just '*'
+      // or if the nested builder effectively results in '*' due to its own defaults.
+      // The current nestedBuilder.buildSupabase() should handle returning '*' or specific columns.
+      if (nestedSelect.isNotEmpty) {
+        parts.add('$jsonKey:$relationshipSpecifier($nestedSelect)');
+      } else {
+        // This case should ideally not happen if nestedBuilder.buildSupabase() always returns at least '*'
+        _logger.warning(
+          "Nested select for '$jsonKey' is empty. Omitting parentheses. This might be an issue.",
+        );
+        parts.add('$jsonKey:$relationshipSpecifier');
+      }
     });
 
     return parts.join(',');
