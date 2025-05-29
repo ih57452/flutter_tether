@@ -1,9 +1,11 @@
 import 'package:sqlite_async/sqlite_async.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tether_libs/client_manager/realtime/realtime_manager.dart';
 import 'package:tether_libs/models/tether_model.dart';
 import 'package:tether_libs/models/table_info.dart';
-import 'client_manager_models.dart';
-import 'client_manager_query_builder.dart';
+import 'manager/client_manager_models.dart';
+import 'manager/client_manager_query_builder.dart';
+import 'manager/rpc_manager.dart';
 
 class ClientManager<TModel extends TetherModel<TModel>> {
   final String tableName;
@@ -42,6 +44,28 @@ class ClientManager<TModel extends TetherModel<TModel>> {
       tableSchemas: tableSchemas,
       fromJsonFactory: fromJsonFactory,
       fromSqliteFactory: fromSqliteFactory,
+    );
+  }
+
+  RpcManager<TModel> get rpc {
+    return RpcManager<TModel>(
+      supabaseClient: client,
+      localDb: localDb,
+      rpcName: tableName,
+      targetSupabaseTableName: tableName,
+      targetLocalTableName: localTableName,
+      fromJsonFactory: fromJsonFactory,
+      tableSchemas: tableSchemas,
+    );
+  }
+
+  RealtimeManager<TModel> realtime({String? schema, String? primaryKey}) {
+    return RealtimeManager<TModel>(
+      supabaseClient: client,
+      localDb: localDb,
+      fromJsonFactory: fromJsonFactory,
+      tableSchemas: tableSchemas,
+      supabaseTableName: tableName,
     );
   }
 }

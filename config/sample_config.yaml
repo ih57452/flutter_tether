@@ -1,22 +1,17 @@
-# This is the main configuration file for the Tether code generation tool.
-# It defines database connection details and controls various aspects of
-# Dart code generation for models, database helpers, and potentially UI-related providers.
-
 # --- Database Connection Details ---
-# Specifies how to connect to your Supabase (PostgreSQL) database to read its schema.
+# Specifies how to connect to your Supabase (<PostgreSQL>) database to read its schema.
 database:
-  host: localhost # The hostname or IP address of your Supabase database.
-  port: 54321 # The port number for your Supabase database. Default Supabase is 5432, but local dev might use 54321 via Docker.
-  database: postgres # The name of the database to connect to (usually 'postgres' for Supabase).
-  username: postgres # The username for connecting to the database (usually 'postgres' for Supabase).
-  password: password # The password for the specified username. For local development, this might be a default. For production, use environment variables or a secure secrets manager.
-  ssl: false # Whether to use SSL for the database connection. Supabase cloud instances require SSL. Set to true for cloud, false for local unsecured instances.
+  host: TETHER_SUPABASE_HOST # The hostname or IP address of your Supabase database.
+  port: TETHER_PORT_NAME # The port number for your Supabase database. Default Supabase is 5432, but local dev might use 54321 via Docker.
+  database: TETHER_DB_NAME # The name of the database to connect to (usually 'postgres' for Supabase).
+  username: TETHER_DB_USERNAME # The username for connecting to the database (usually 'postgres' for Supabase).
+  password: TETHER_DB_PASSWORD # The password for the specified username. For local development, this might be a default. For production, use environment variables or a secure secrets manager.
+  ssl: TETHER_SSL # Whether to use SSL for the database connection. Supabase cloud instances require SSL. Set to true for cloud, false for local unsecured instances.
 
 # --- General Code Generation Settings ---
-# These settings apply broadly to the code generation process.
 generation:
-  # The primary output directory where most generated Dart files (excluding assets like SQL migrations) will be placed.
-  # Paths for specific generated files (models, builders, etc.) are often relative to this directory.
+  # The primary output directory where most generated Dart files will be placed.
+  # Paths for specific generated files (models, builders, etc.) are relative to this directory.
   output_directory: lib/database
 
   # A list of table names from your Supabase schema that should be completely ignored by all generators.
@@ -134,6 +129,19 @@ generation:
     # The output subdirectory within 'output_directory' for generated provider files.
     # E.g., if output_directory is 'lib/database', providers will be in 'lib/database/providers/'.
     output_subdir: 'providers'
+
+  # --- Authentication Settings ---
+  # If your application uses Supabase authentication, you might want to include settings for generating
+  # authentication-related classes and methods. This can include user profile management, session handling,
+  authentication:
+    # If true, the generator will create authentication-related classes and methods.
+    enabled: true
+    profile_table: 'profiles' # The name of the table that stores user profiles, like users or profiles.
+
+  # --- Background Services Settings ---
+  background_services:
+  # If true, the generator will create background service-related classes and methods.
+    enabled: true
 
   # A list of common string endings to remove from database column names when converting them
   # to Dart field names or relationship names. This helps in generating cleaner, more idiomatic Dart names.

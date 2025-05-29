@@ -19,7 +19,7 @@ class ImagesManager extends ClientManager<ImageModel> {
     required super.fromSqliteFactory,
   }) : super(
           tableName: 'images',
-          localTableName: 'images_local',
+          localTableName: 'images',
         );
 }
 

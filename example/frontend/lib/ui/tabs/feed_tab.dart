@@ -14,7 +14,7 @@ final allGenresProvider = FutureProvider<List<GenreModel>>((ref) async {
   // Assuming a method like getAll() or query().getAll() exists
   // For this example, let's assume it fetches all genres without specific filters.
   // You might need to adjust this based on your ClientManager capabilities.
-  return await genresManager.query().select(genreSelect);
+  return await genresManager.query().select(genreSelect).remoteOnly();
 });
 
 class StringNotifier extends Notifier<String?> {

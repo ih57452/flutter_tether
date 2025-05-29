@@ -19,7 +19,7 @@ class BooksManager extends ClientManager<BookModel> {
     required super.fromSqliteFactory,
   }) : super(
           tableName: 'books',
-          localTableName: 'books_local',
+          localTableName: 'books',
         );
 }
 

@@ -9,7 +9,7 @@ final bookGenreSelect = BookGenresSelectBuilder().select().withGenre(
 final bookSelect = BooksSelectBuilder()
     .select()
     .withAuthor(authorSelect)
-    .withBookGenres(bookGenreSelect)
+    .withBookGenres(bookGenreSelect.withGenre(genreSelect))
     .withCoverImage(imageSelect)
     .withBannerImage(imageSelect);
 final bookstoreBookSelect = BookstoreBooksSelectBuilder().select().withBook(

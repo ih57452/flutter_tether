@@ -19,7 +19,7 @@ class GenresManager extends ClientManager<GenreModel> {
     required super.fromSqliteFactory,
   }) : super(
           tableName: 'genres',
-          localTableName: 'genres_local',
+          localTableName: 'genres',
         );
 }
 

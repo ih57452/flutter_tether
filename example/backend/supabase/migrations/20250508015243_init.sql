@@ -107,6 +107,35 @@ CREATE INDEX idx_bookstore_books_bookstore_id ON bookstore_books (bookstore_id);
 -- Index for faster lookups by book_id
 CREATE INDEX idx_bookstore_books_book_id ON bookstore_books (book_id);
 
+-- Table: profiles (stores public user data, linked to auth.users)
+CREATE TABLE profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE, -- Links to auth.users table
+    username TEXT UNIQUE,
+    full_name TEXT,
+    avatar_url TEXT,
+    website TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Optional: Add an index on username for faster lookups if you query by username frequently
+CREATE INDEX idx_profiles_username ON profiles (username);
+
+-- Function to automatically create a profile entry when a new user signs up
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, updated_at, created_at)
+  VALUES (NEW.id, NOW(), NOW());
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger to call handle_new_user function after a new user is inserted into auth.users
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
 -- Function to update the "document" column in the books table
 CREATE OR REPLACE FUNCTION update_books_document() RETURNS TRIGGER AS $$
 BEGIN

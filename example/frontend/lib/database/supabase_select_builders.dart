@@ -63,7 +63,7 @@ class BookstoresSelectBuilder extends SupabaseSelectBuilderBase {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'bookstoreBooks',
+        jsonKey: 'bookstore_books',
         fkConstraintName: 'bookstore_books_bookstore_id_fkey',
         nestedBuilder: finalBuilder,
         innerJoin: innerJoin);
@@ -197,7 +197,7 @@ class GenresSelectBuilder extends SupabaseSelectBuilderBase {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'bookGenres',
+        jsonKey: 'book_genres',
         fkConstraintName: 'book_genres_genre_id_fkey',
         nestedBuilder: finalBuilder,
         innerJoin: innerJoin);
@@ -262,7 +262,7 @@ class ImagesSelectBuilder extends SupabaseSelectBuilderBase {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'bannerImages',
+        jsonKey: 'banner_images',
         fkConstraintName: 'books_banner_image_id_fkey',
         nestedBuilder: finalBuilder,
         innerJoin: innerJoin);
@@ -275,7 +275,7 @@ class ImagesSelectBuilder extends SupabaseSelectBuilderBase {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'coverImages',
+        jsonKey: 'cover_images',
         fkConstraintName: 'books_cover_image_id_fkey',
         nestedBuilder: finalBuilder,
         innerJoin: innerJoin);
@@ -362,7 +362,7 @@ class BooksSelectBuilder extends SupabaseSelectBuilderBase {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'bannerImage',
+        jsonKey: 'banner_image',
         fkConstraintName: 'books_banner_image_id_fkey',
         nestedBuilder: finalBuilder,
         innerJoin: innerJoin);
@@ -375,7 +375,7 @@ class BooksSelectBuilder extends SupabaseSelectBuilderBase {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'coverImage',
+        jsonKey: 'cover_image',
         fkConstraintName: 'books_cover_image_id_fkey',
         nestedBuilder: finalBuilder,
         innerJoin: innerJoin);
@@ -388,7 +388,7 @@ class BooksSelectBuilder extends SupabaseSelectBuilderBase {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'bookGenres',
+        jsonKey: 'book_genres',
         fkConstraintName: 'book_genres_book_id_fkey',
         nestedBuilder: finalBuilder,
         innerJoin: innerJoin);
@@ -401,7 +401,7 @@ class BooksSelectBuilder extends SupabaseSelectBuilderBase {
       finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'bookstoreBooks',
+        jsonKey: 'bookstore_books',
         fkConstraintName: 'bookstore_books_book_id_fkey',
         nestedBuilder: finalBuilder,
         innerJoin: innerJoin);
@@ -557,6 +557,60 @@ class BookstoreBooksSelectBuilder extends SupabaseSelectBuilderBase {
         fkConstraintName: 'bookstore_books_bookstore_id_fkey',
         nestedBuilder: finalBuilder,
         innerJoin: innerJoin);
+    return this;
+  }
+
+}
+
+
+enum ProfilesColumn implements SupabaseColumn {
+  avatarUrl('avatar_url', 'avatar_url', 'profiles', null),
+  createdAt('created_at', 'created_at', 'profiles', null),
+  fullName('full_name', 'full_name', 'profiles', null),
+  id('id', 'id', 'profiles', null),
+  updatedAt('updated_at', 'updated_at', 'profiles', null),
+  username('username', 'username', 'profiles', null),
+  website('website', 'website', 'profiles', null),
+;
+  @override
+  final String originalName;
+  @override
+  final String localName;
+  @override
+  final String tableName;
+  @override
+  final String? relationshipPrefix;
+
+  const ProfilesColumn(this.originalName, this.localName, this.tableName, this.relationshipPrefix);
+
+  @override
+  String get dbName => originalName;
+
+  @override
+  String get dartName => localName;
+
+  @override
+  String get qualified => 'profiles.$originalName';
+
+  @override
+  String get fullyQualified => relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
+
+  @override
+  SupabaseColumn related(String relationshipName) => RelatedColumnRef(originalName, localName, tableName, relationshipName);
+}
+
+
+class ProfilesSelectBuilder extends SupabaseSelectBuilderBase {
+
+  ProfilesSelectBuilder() : super(primaryTableKey: 'public.profiles', currentTableInfo: globalSupabaseSchema['public.profiles']!);
+
+  ProfilesSelectBuilder select([List<ProfilesColumn>? columns]) {
+    if (columns == null || columns.isEmpty) {
+      selectAll();
+    } else {
+      final dbColumnNames = columns.map((e) => e.dbName).toList();
+      selectSupabaseColumns(dbColumnNames);
+    }
     return this;
   }
 

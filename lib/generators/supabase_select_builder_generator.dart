@@ -9,7 +9,7 @@
 
 // // Import config and schema classes
 // import '../config/config_model.dart';
-// import '../../packages/tether_generators/lib/utils/table_info.dart';
+// import '../../packages/tether/lib/utils/table_info.dart';
 // import '../../packages/tether_libs/lib/utils/to_camel_case.dart';
 // import '../../packages/tether_libs/lib/utils/string_utils.dart';
 

@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:tether_libs/utils/string_utils.dart';
-import 'package:tether_libs/utils/to_camel_case.dart';
 
 /// Dart keywords that can't be used as identifiers without modification
 final Set<String> _dartKeywords = {
@@ -375,7 +374,7 @@ class SupabaseForeignKeyConstraint {
     }
 
     // Convert the base name to camelCase
-    baseName = toCamelCase(baseName);
+    baseName = StringUtils.toCamelCase(baseName);
 
     // If the base name matches the foreign table name, return the pluralized table name
     if (baseName.toLowerCase() == originalForeignTableName.toLowerCase()) {
@@ -383,7 +382,7 @@ class SupabaseForeignKeyConstraint {
     }
 
     // Combine the base name with the foreign table name to ensure uniqueness
-    return '${baseName}${StringUtils.capitalize(toCamelCase(originalForeignTableName))}';
+    return '${baseName}${StringUtils.capitalize(StringUtils.toCamelCase(originalForeignTableName))}';
   }
 
   @override

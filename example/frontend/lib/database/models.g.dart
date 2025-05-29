@@ -50,7 +50,7 @@ class BookstoreModel extends TetherModel<BookstoreModel> {
       isOpen: json['is_open'] == null ? null : json['is_open'] as bool,
       name: json['name']! as String,
       updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
-      bookstoreBooks: (json['bookstoreBooks'] as List<dynamic>?)?.map((e) => BookstoreBookModel.fromJson(e as Map<String, dynamic>)).toList(),
+      bookstoreBooks: (json['bookstore_books'] as List<dynamic>?)?.map((e) => BookstoreBookModel.fromJson(e as Map<String, dynamic>)).toList(),
     );
   }
 
@@ -75,23 +75,22 @@ class BookstoreModel extends TetherModel<BookstoreModel> {
       isOpen: json['is_open'] == null ? null : json['is_open'] as bool,
       name: json['name']! as String,
       updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
-      bookstoreBooks: null, // Reverse relations not populated from jsobjects
+      bookstoreBooks: (json['bookstore_books'] as List<dynamic>?)?.map((e) => BookstoreBookModel.fromJson(e as Map<String, dynamic>)).toList(),
     );
   }
 
   /// Converts the instance to a JSON map (for Supabase).
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'address': address,
-      'created_at': createdAt?.toIso8601String(),
-      'established_date': establishedDate?.toIso8601String(),
-      'id': id,
-      'is_open': isOpen,
-      'name': name,
-      'updated_at': updatedAt?.toIso8601String(),
-      'bookstoreBooks': bookstoreBooks?.map((e) => e.toJson()).toList(),
-    };
+    final map = <String, dynamic>{};
+    map['address'] = address;
+    map['created_at'] = createdAt?.toIso8601String();
+    map['established_date'] = establishedDate?.toIso8601String();
+    map['id'] = id;
+    map['is_open'] = isOpen;
+    map['name'] = name;
+    map['updated_at'] = updatedAt?.toIso8601String();
+    return map;
   }
 
   /// Converts the instance to a map suitable for SQLite insertion/update.
@@ -218,25 +217,24 @@ class AuthorModel extends TetherModel<AuthorModel> {
       id: json['id']! as String,
       lastName: json['last_name']! as String,
       updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
-      books: null, // Reverse relations not populated from jsobjects
+      books: (json['books'] as List<dynamic>?)?.map((e) => BookModel.fromJson(e as Map<String, dynamic>)).toList(),
     );
   }
 
   /// Converts the instance to a JSON map (for Supabase).
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'bio': bio,
-      'birth_date': birthDate?.toIso8601String(),
-      'created_at': createdAt?.toIso8601String(),
-      'death_date': deathDate?.toIso8601String(),
-      'document': document,
-      'first_name': firstName,
-      'id': id,
-      'last_name': lastName,
-      'updated_at': updatedAt?.toIso8601String(),
-      'books': books?.map((e) => e.toJson()).toList(),
-    };
+    final map = <String, dynamic>{};
+    map['bio'] = bio;
+    map['birth_date'] = birthDate?.toIso8601String();
+    map['created_at'] = createdAt?.toIso8601String();
+    map['death_date'] = deathDate?.toIso8601String();
+    map['document'] = document;
+    map['first_name'] = firstName;
+    map['id'] = id;
+    map['last_name'] = lastName;
+    map['updated_at'] = updatedAt?.toIso8601String();
+    return map;
   }
 
   /// Converts the instance to a map suitable for SQLite insertion/update.
@@ -326,7 +324,7 @@ class GenreModel extends TetherModel<GenreModel> {
       id: json['id']! as String,
       name: json['name']! as String,
       updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
-      bookGenres: (json['bookGenres'] as List<dynamic>?)?.map((e) => BookGenreModel.fromJson(e as Map<String, dynamic>)).toList(),
+      bookGenres: (json['book_genres'] as List<dynamic>?)?.map((e) => BookGenreModel.fromJson(e as Map<String, dynamic>)).toList(),
     );
   }
 
@@ -349,21 +347,20 @@ class GenreModel extends TetherModel<GenreModel> {
       id: json['id']! as String,
       name: json['name']! as String,
       updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
-      bookGenres: null, // Reverse relations not populated from jsobjects
+      bookGenres: (json['book_genres'] as List<dynamic>?)?.map((e) => BookGenreModel.fromJson(e as Map<String, dynamic>)).toList(),
     );
   }
 
   /// Converts the instance to a JSON map (for Supabase).
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'created_at': createdAt?.toIso8601String(),
-      'description': description,
-      'id': id,
-      'name': name,
-      'updated_at': updatedAt?.toIso8601String(),
-      'bookGenres': bookGenres?.map((e) => e.toJson()).toList(),
-    };
+    final map = <String, dynamic>{};
+    map['created_at'] = createdAt?.toIso8601String();
+    map['description'] = description;
+    map['id'] = id;
+    map['name'] = name;
+    map['updated_at'] = updatedAt?.toIso8601String();
+    return map;
   }
 
   /// Converts the instance to a map suitable for SQLite insertion/update.
@@ -464,21 +461,20 @@ class ImageModel extends TetherModel<ImageModel> {
       id: json['id']! as String,
       updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
       url: json['url']! as String,
-      books: null, // Reverse relations not populated from jsobjects
+      books: (json['books'] as List<dynamic>?)?.map((e) => BookModel.fromJson(e as Map<String, dynamic>)).toList(),
     );
   }
 
   /// Converts the instance to a JSON map (for Supabase).
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'alt_text': altText,
-      'created_at': createdAt?.toIso8601String(),
-      'id': id,
-      'updated_at': updatedAt?.toIso8601String(),
-      'url': url,
-      'books': books?.map((e) => e.toJson()).toList(),
-    };
+    final map = <String, dynamic>{};
+    map['alt_text'] = altText;
+    map['created_at'] = createdAt?.toIso8601String();
+    map['id'] = id;
+    map['updated_at'] = updatedAt?.toIso8601String();
+    map['url'] = url;
+    return map;
   }
 
   /// Converts the instance to a map suitable for SQLite insertion/update.
@@ -605,10 +601,10 @@ class BookModel extends TetherModel<BookModel> {
       title: json['title']! as String,
       updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
       author: json['author'] == null ? null : AuthorModel.fromJson(json['author'] as Map<String, dynamic>),
-      bannerImage: json['bannerImage'] == null ? null : ImageModel.fromJson(json['bannerImage'] as Map<String, dynamic>),
-      coverImage: json['coverImage'] == null ? null : ImageModel.fromJson(json['coverImage'] as Map<String, dynamic>),
-      bookGenres: (json['bookGenres'] as List<dynamic>?)?.map((e) => BookGenreModel.fromJson(e as Map<String, dynamic>)).toList(),
-      bookstoreBooks: (json['bookstoreBooks'] as List<dynamic>?)?.map((e) => BookstoreBookModel.fromJson(e as Map<String, dynamic>)).toList(),
+      bannerImage: json['banner_image'] == null ? null : ImageModel.fromJson(json['banner_image'] as Map<String, dynamic>),
+      coverImage: json['cover_image'] == null ? null : ImageModel.fromJson(json['cover_image'] as Map<String, dynamic>),
+      bookGenres: (json['book_genres'] as List<dynamic>?)?.map((e) => BookGenreModel.fromJson(e as Map<String, dynamic>)).toList(),
+      bookstoreBooks: (json['bookstore_books'] as List<dynamic>?)?.map((e) => BookstoreBookModel.fromJson(e as Map<String, dynamic>)).toList(),
     );
   }
 
@@ -641,37 +637,32 @@ class BookModel extends TetherModel<BookModel> {
       title: json['title']! as String,
       updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
       author: json['author'] == null ? null : AuthorModel.fromJson(json['author'] as Map<String, dynamic>),
-      bannerImage: json['bannerImage'] == null ? null : ImageModel.fromJson(json['bannerImage'] as Map<String, dynamic>),
-      coverImage: json['coverImage'] == null ? null : ImageModel.fromJson(json['coverImage'] as Map<String, dynamic>),
-      bookGenres: null, // Reverse relations not populated from jsobjects
-      bookstoreBooks: null, // Reverse relations not populated from jsobjects
+      bannerImage: json['banner_image'] == null ? null : ImageModel.fromJson(json['banner_image'] as Map<String, dynamic>),
+      coverImage: json['cover_image'] == null ? null : ImageModel.fromJson(json['cover_image'] as Map<String, dynamic>),
+      bookGenres: (json['book_genres'] as List<dynamic>?)?.map((e) => BookGenreModel.fromJson(e as Map<String, dynamic>)).toList(),
+      bookstoreBooks: (json['bookstore_books'] as List<dynamic>?)?.map((e) => BookstoreBookModel.fromJson(e as Map<String, dynamic>)).toList(),
     );
   }
 
   /// Converts the instance to a JSON map (for Supabase).
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'author_id': authorId,
-      'banner_image_id': bannerImageId,
-      'cover_image_id': coverImageId,
-      'created_at': createdAt?.toIso8601String(),
-      'description': description,
-      'document': document,
-      'id': id,
-      'metadata': metadata,
-      'price': price,
-      'publication_date': publicationDate?.toIso8601String(),
-      'stock_count': stockCount,
-      'tags': tags,
-      'title': title,
-      'updated_at': updatedAt?.toIso8601String(),
-      'author': author?.toJson(),
-      'bannerImage': bannerImage?.toJson(),
-      'coverImage': coverImage?.toJson(),
-      'bookGenres': bookGenres?.map((e) => e.toJson()).toList(),
-      'bookstoreBooks': bookstoreBooks?.map((e) => e.toJson()).toList(),
-    };
+    final map = <String, dynamic>{};
+    map['author_id'] = authorId;
+    map['banner_image_id'] = bannerImageId;
+    map['cover_image_id'] = coverImageId;
+    map['created_at'] = createdAt?.toIso8601String();
+    map['description'] = description;
+    map['document'] = document;
+    map['id'] = id;
+    map['metadata'] = metadata;
+    map['price'] = price;
+    map['publication_date'] = publicationDate?.toIso8601String();
+    map['stock_count'] = stockCount;
+    map['tags'] = tags;
+    map['title'] = title;
+    map['updated_at'] = updatedAt?.toIso8601String();
+    return map;
   }
 
   /// Converts the instance to a map suitable for SQLite insertion/update.
@@ -809,13 +800,11 @@ class BookGenreModel extends TetherModel<BookGenreModel> {
   /// Converts the instance to a JSON map (for Supabase).
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'book_id': bookId,
-      'genre_id': genreId,
-      'id': id,
-      'book': book?.toJson(),
-      'genre': genre?.toJson(),
-    };
+    final map = <String, dynamic>{};
+    map['book_id'] = bookId;
+    map['genre_id'] = genreId;
+    map['id'] = id;
+    return map;
   }
 
   /// Converts the instance to a map suitable for SQLite insertion/update.
@@ -914,13 +903,11 @@ class BookstoreBookModel extends TetherModel<BookstoreBookModel> {
   /// Converts the instance to a JSON map (for Supabase).
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'book_id': bookId,
-      'bookstore_id': bookstoreId,
-      'id': id,
-      'book': book?.toJson(),
-      'bookstore': bookstore?.toJson(),
-    };
+    final map = <String, dynamic>{};
+    map['book_id'] = bookId;
+    map['bookstore_id'] = bookstoreId;
+    map['id'] = id;
+    return map;
   }
 
   /// Converts the instance to a map suitable for SQLite insertion/update.
@@ -954,6 +941,132 @@ class BookstoreBookModel extends TetherModel<BookstoreBookModel> {
   @override
   String toString() {
     return 'BookstoreBookModel(bookId: $bookId, bookstoreId: $bookstoreId, id: $id, book: $book, bookstore: $bookstore)';
+  }
+}
+
+/// Represents the `profiles` table.
+class ProfileModel extends TetherModel<ProfileModel> {
+  final String? avatarUrl;
+  final DateTime? createdAt;
+  final String? fullName;
+  final String id;
+  final DateTime? updatedAt;
+  final String? username;
+  final String? website;
+
+  ProfileModel({
+    this.avatarUrl,
+    this.createdAt,
+    this.fullName,
+    required this.id,
+    this.updatedAt,
+    this.username,
+    this.website,
+  }) : super({
+         'avatar_url': avatarUrl,
+         'created_at': createdAt,
+         'full_name': fullName,
+         'id': id,
+         'updated_at': updatedAt,
+         'username': username,
+         'website': website,
+         'id': id,
+       });
+
+  /// The primary key for this model instance.
+  @override
+  String get localId => id;
+
+  /// Creates an instance from a JSON map (e.g., from Supabase).
+  factory ProfileModel.fromJson(Map<String, dynamic> json) {
+    return ProfileModel(
+      avatarUrl: json['avatar_url'] == null ? null : json['avatar_url'] as String,
+      createdAt: json['created_at'] == null ? null : DateTime.parse(json['created_at'] as String),
+      fullName: json['full_name'] == null ? null : json['full_name'] as String,
+      id: json['id']! as String,
+      updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
+      username: json['username'] == null ? null : json['username'] as String,
+      website: json['website'] == null ? null : json['website'] as String,
+    );
+  }
+
+  /// Creates an instance from a map (e.g., from SQLite row containing nested JSON in 'jsobjects' column).
+  factory ProfileModel.fromSqlite(Row row) {
+    final String? jsonDataString = row['jsobjects'] as String?;
+    if (jsonDataString == null) {
+      // Or handle as an error, depending on expected data integrity. This might lead to issues if fields are required.
+      // For example, you could throw an exception: 
+      // throw ArgumentError('SQLite row is missing 'jsobjects' column for ProfileModel deserialization.');
+      // Alternatively, if a model can be validly empty or with all nulls (if fields allow):
+      // return ProfileModel(/* pass all nulls or default values if constructor allows */);
+      // For now, we'll create an empty map, and let constructor validation handle missing required fields.
+    }
+    final Map<String, dynamic> json = jsonDataString == null ? <String, dynamic>{} : jsonDecode(jsonDataString) as Map<String, dynamic>;
+
+    return ProfileModel(
+      avatarUrl: json['avatar_url'] == null ? null : json['avatar_url'] as String,
+      createdAt: json['created_at'] == null ? null : DateTime.parse(json['created_at'] as String),
+      fullName: json['full_name'] == null ? null : json['full_name'] as String,
+      id: json['id']! as String,
+      updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
+      username: json['username'] == null ? null : json['username'] as String,
+      website: json['website'] == null ? null : json['website'] as String,
+    );
+  }
+
+  /// Converts the instance to a JSON map (for Supabase).
+  @override
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    map['avatar_url'] = avatarUrl;
+    map['created_at'] = createdAt?.toIso8601String();
+    map['full_name'] = fullName;
+    map['id'] = id;
+    map['updated_at'] = updatedAt?.toIso8601String();
+    map['username'] = username;
+    map['website'] = website;
+    return map;
+  }
+
+  /// Converts the instance to a map suitable for SQLite insertion/update.
+  @override
+  Map<String, dynamic> toSqlite() {
+    return {
+      'avatar_url': avatarUrl,
+      'created_at': createdAt?.toIso8601String(),
+      'full_name': fullName,
+      'id': id,
+      'updated_at': updatedAt?.toIso8601String(),
+      'username': username,
+      'website': website,
+    };
+  }
+
+  /// Creates a copy of this instance with potentially modified fields.
+  @override
+  ProfileModel copyWith({
+    String? avatarUrl,
+    DateTime? createdAt,
+    String? fullName,
+    String? id,
+    DateTime? updatedAt,
+    String? username,
+    String? website,
+  }) {
+    return ProfileModel(
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      createdAt: createdAt ?? this.createdAt,
+      fullName: fullName ?? this.fullName,
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      username: username ?? this.username,
+      website: website ?? this.website,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'ProfileModel(avatarUrl: $avatarUrl, createdAt: $createdAt, fullName: $fullName, id: $id, updatedAt: $updatedAt, username: $username, website: $website)';
   }
 }
 

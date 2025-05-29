@@ -1,12 +1,12 @@
 # supabase_gen configuration file
 
 database:
-  host: localhost
-  port: 54322
-  database: postgres
-  username: postgres
-  password: postgres
-  ssl: false
+  host: TETHER_SUPABASE_HOST # The hostname or IP address of your Supabase database.
+  port: TETHER_SUPABASE_PORT # The port number for your Supabase database. Default Supabase is 5432, but local dev might use 54321 via Docker.
+  database: TETHER_SUPABASE_DB_NAME # The name of the database to connect to (usually 'postgres' for Supabase).
+  username: TETHER_SUPABASE_DB_USER # The username for connecting to the database (usually 'postgres' for Supabase).
+  password: TETHER_SUPABASE_DB_PASSWORD # The password for the specified username. For local development, this might be a default. For production, use environment variables or a secure secrets manager.
+  ssl: TETHER_SUPABASE_DB_SSL
 generation:
   output_directory: lib/database
   model_prefix: ''
@@ -66,6 +66,19 @@ generation:
   providers:
     enabled: true # Assuming you might want an enabled flag later
     output_subdir: 'providers' # Subdirectory within output_directory
+
+  # --- Authentication Settings ---
+  # If your application uses Supabase authentication, you might want to include settings for generating
+  # authentication-related classes and methods. This can include user profile management, session handling,
+  authentication:
+    # If true, the generator will create authentication-related classes and methods.
+    enabled: true
+    profile_table: 'profiles' # The name of the table that stores user profiles, like users or profiles.
+
+  # --- Background Services Settings ---
+  background_services:
+  # If true, the generator will create background service-related classes and methods.
+    enabled: true
 
   # Endings to remove during sanitization
   sanitization_endings:

@@ -400,3 +400,67 @@ VALUES
     ('9c968eac-613f-46d9-8aa7-2ee2adeedf71','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
     ('cc45d53e-5911-4e23-b590-df41020d1aed','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
     ('c05ea359-2d93-4b28-95d9-b87f87382260','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+
+-- ---------------------------------------------------------------------
+-- SEED AUTH USER AND PROFILE
+-- ---------------------------------------------------------------------
+
+-- Note: For auth.users, the encrypted_password should be a valid bcrypt hash.
+-- The one used below is a placeholder and will not allow login.
+-- To make this user login-able with a password like 'password123',
+-- you must generate a bcrypt hash for 'password123' and replace the placeholder.
+-- You can often do this via the Supabase dashboard (create a user, get hash) or a bcrypt utility.
+
+-- Also, ensure the UUID for the user (seed_user_id) is unique if you add more seed users.
+
+DO $$
+DECLARE
+    seed_user_id UUID := '00000000-0000-0000-0000-000000000001'; -- Example unique UUID for the user
+    seed_user_email TEXT := 'seeduser@example.com';
+    -- IMPORTANT: This is a PLACEHOLDER BCRYPT HASH. Replace with a real one for a working password.
+    -- A real bcrypt hash for 'password123' might look like '$2a$10$YourSaltHereYourHashHere...'
+    seed_user_encrypted_password TEXT := '$2a$10$WcZRKh.DPrPpPLZDSuruYecm3tQdRj.XRans94pnQ0xnYYNRyoeNy';
+    seed_user_username TEXT := 'example_user';
+    seed_user_full_name TEXT := 'Example User';
+    seed_user_avatar_url TEXT := 'https://example.com/avatars/seed_user_alpha.png';
+    seed_user_website TEXT := 'https://example.com/seeduseralpha';
+BEGIN
+    -- Insert into auth.users
+    -- This will trigger the 'handle_new_user' function to create a basic profile.
+    INSERT INTO auth.users (
+        id,
+        aud,
+        role,
+        email,
+        encrypted_password,
+        email_confirmed_at, -- Mark email as confirmed for easier testing
+        created_at,
+        updated_at,
+        last_sign_in_at -- Can be set to NOW() if desired for seeded user
+    )
+    VALUES (
+        seed_user_id,
+        'authenticated', -- Default audience for authenticated users
+        'authenticated', -- Default role for authenticated users
+        seed_user_email,
+        seed_user_encrypted_password,
+        NOW(),           -- Email confirmed
+        NOW(),           -- Creation timestamp
+        NOW(),           -- Update timestamp
+        NOW()            -- Last sign-in timestamp
+    )
+    ON CONFLICT (id) DO NOTHING; -- Avoid error if user already exists (e.g., re-running seed)
+
+    -- Update the profile created by the trigger with more details.
+    -- The trigger 'handle_new_user' should have already created a row in 'profiles'
+    -- with the 'id', 'created_at', and 'updated_at' fields populated.
+    UPDATE public.profiles
+    SET
+        username = seed_user_username,
+        full_name = seed_user_full_name,
+        avatar_url = seed_user_avatar_url,
+        website = seed_user_website,
+        updated_at = NOW() -- Explicitly set updated_at for the profile update
+    WHERE
+        id = seed_user_id;
+END $$;

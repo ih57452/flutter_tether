@@ -118,7 +118,13 @@
       }
     ],
     "comment": null,
-    "reverseRelations": []
+    "reverseRelations": [
+      {
+        "fieldNameInThisModel": "bookstoreBooks",
+        "referencingTableOriginalName": "bookstore_books",
+        "foreignKeyColumnInReferencingTable": "bookstore_id"
+      }
+    ]
   },
   {
     "name": "authors",
@@ -275,7 +281,13 @@
       }
     ],
     "comment": null,
-    "reverseRelations": []
+    "reverseRelations": [
+      {
+        "fieldNameInThisModel": "books",
+        "referencingTableOriginalName": "books",
+        "foreignKeyColumnInReferencingTable": "author_id"
+      }
+    ]
   },
   {
     "name": "genres",
@@ -384,7 +396,13 @@
       }
     ],
     "comment": null,
-    "reverseRelations": []
+    "reverseRelations": [
+      {
+        "fieldNameInThisModel": "bookGenres",
+        "referencingTableOriginalName": "book_genres",
+        "foreignKeyColumnInReferencingTable": "genre_id"
+      }
+    ]
   },
   {
     "name": "images",
@@ -469,7 +487,18 @@
       }
     ],
     "comment": null,
-    "reverseRelations": []
+    "reverseRelations": [
+      {
+        "fieldNameInThisModel": "books",
+        "referencingTableOriginalName": "books",
+        "foreignKeyColumnInReferencingTable": "banner_image_id"
+      },
+      {
+        "fieldNameInThisModel": "books",
+        "referencingTableOriginalName": "books",
+        "foreignKeyColumnInReferencingTable": "cover_image_id"
+      }
+    ]
   },
   {
     "name": "books",
@@ -792,7 +821,18 @@
       }
     ],
     "comment": null,
-    "reverseRelations": []
+    "reverseRelations": [
+      {
+        "fieldNameInThisModel": "bookGenres",
+        "referencingTableOriginalName": "book_genres",
+        "foreignKeyColumnInReferencingTable": "book_id"
+      },
+      {
+        "fieldNameInThisModel": "bookstoreBooks",
+        "referencingTableOriginalName": "bookstore_books",
+        "foreignKeyColumnInReferencingTable": "book_id"
+      }
+    ]
   },
   {
     "name": "bookGenres",
@@ -1112,6 +1152,171 @@
         ],
         "originalColumns": [
           "bookstore_id"
+        ]
+      }
+    ],
+    "comment": null,
+    "reverseRelations": []
+  },
+  {
+    "name": "profiles",
+    "originalName": "profiles",
+    "localName": "profiles",
+    "schema": "public",
+    "columns": [
+      {
+        "name": "avatarUrl",
+        "originalName": "avatar_url",
+        "localName": "avatar_url",
+        "type": "text",
+        "isNullable": true,
+        "isPrimaryKey": false,
+        "isUnique": false,
+        "defaultValue": null,
+        "comment": null,
+        "isIdentity": false
+      },
+      {
+        "name": "createdAt",
+        "originalName": "created_at",
+        "localName": "created_at",
+        "type": "timestamp with time zone",
+        "isNullable": true,
+        "isPrimaryKey": false,
+        "isUnique": false,
+        "defaultValue": "now()",
+        "comment": null,
+        "isIdentity": false
+      },
+      {
+        "name": "fullName",
+        "originalName": "full_name",
+        "localName": "full_name",
+        "type": "text",
+        "isNullable": true,
+        "isPrimaryKey": false,
+        "isUnique": false,
+        "defaultValue": null,
+        "comment": null,
+        "isIdentity": false
+      },
+      {
+        "name": "id",
+        "originalName": "id",
+        "localName": "id",
+        "type": "uuid",
+        "isNullable": false,
+        "isPrimaryKey": true,
+        "isUnique": false,
+        "defaultValue": null,
+        "comment": null,
+        "isIdentity": false
+      },
+      {
+        "name": "updatedAt",
+        "originalName": "updated_at",
+        "localName": "updated_at",
+        "type": "timestamp with time zone",
+        "isNullable": true,
+        "isPrimaryKey": false,
+        "isUnique": false,
+        "defaultValue": "now()",
+        "comment": null,
+        "isIdentity": false
+      },
+      {
+        "name": "username",
+        "originalName": "username",
+        "localName": "username",
+        "type": "text",
+        "isNullable": true,
+        "isPrimaryKey": false,
+        "isUnique": true,
+        "defaultValue": null,
+        "comment": null,
+        "isIdentity": false
+      },
+      {
+        "name": "website",
+        "originalName": "website",
+        "localName": "website",
+        "type": "text",
+        "isNullable": true,
+        "isPrimaryKey": false,
+        "isUnique": false,
+        "defaultValue": null,
+        "comment": null,
+        "isIdentity": false
+      }
+    ],
+    "foreignKeys": [
+      {
+        "constraintName": "profiles_id_fkey",
+        "columns": [
+          "id"
+        ],
+        "originalColumns": [
+          "id"
+        ],
+        "localColumns": [
+          "id"
+        ],
+        "foreignTableSchema": "auth",
+        "foreignTableName": "users",
+        "originalForeignTableName": "users",
+        "localForeignTableName": "users",
+        "foreignColumns": [
+          "id"
+        ],
+        "originalForeignColumns": [
+          "id"
+        ],
+        "localForeignColumns": [
+          "id"
+        ],
+        "updateRule": "NO ACTION",
+        "deleteRule": "CASCADE",
+        "matchOption": "NONE",
+        "isDeferrable": false,
+        "initiallyDeferred": false,
+        "joinTableName": null
+      }
+    ],
+    "indexes": [
+      {
+        "name": "idxProfilesUsername",
+        "originalName": "idx_profiles_username",
+        "localName": "idxProfilesUsername",
+        "isUnique": false,
+        "columns": [
+          "username"
+        ],
+        "originalColumns": [
+          "username"
+        ]
+      },
+      {
+        "name": "profilesPkey",
+        "originalName": "profiles_pkey",
+        "localName": "profilesPkey",
+        "isUnique": true,
+        "columns": [
+          "id"
+        ],
+        "originalColumns": [
+          "id"
+        ]
+      },
+      {
+        "name": "profilesUsernameKey",
+        "originalName": "profiles_username_key",
+        "localName": "profilesUsernameKey",
+        "isUnique": true,
+        "columns": [
+          "username"
+        ],
+        "originalColumns": [
+          "username"
         ]
       }
     ],

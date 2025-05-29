@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
-import 'package:tether_libs/client_manager/client_manager_models.dart';
+import 'package:tether_libs/client_manager/manager/client_manager_models.dart';
 import 'package:tether_libs/models/table_info.dart';
 
 // The generator will add the correct import to the generated

@@ -1,11 +1,11 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // Core Migration: Feed Item References
 // Migration version: 0000
-// Generated on 2025-05-24T15:29:14.879929
+// Generated on 2025-05-29T10:05:14.686422
 
 const List<String> migrationSqlStatementsV0000_core_feed = [
   '''-- Core Feed Item References Table (Version 0000)''',
-  '''-- Generated on 2025-05-24T15:29:14.879929''',
+  '''-- Generated on 2025-05-29T10:05:14.686422''',
   r'''
 CREATE TABLE IF NOT EXISTS feed_item_references (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,5 +29,34 @@ CREATE TABLE IF NOT EXISTS user_preferences (
 ''',
   r'''
 CREATE INDEX IF NOT EXISTS idx_user_preferences_key ON user_preferences (preference_key);
+''',
+  '''-- Core Background Service Job Queue Table (Version 0000)''',
+  '''-- Generated on 2025-05-29T10:05:14.686422''',
+  r'''
+CREATE TABLE IF NOT EXISTS background_service_jobs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_key TEXT NOT NULL,                      -- Identifier for the function/task to execute
+    payload TEXT,                               -- JSON string containing arguments for the job
+    status TEXT NOT NULL DEFAULT 'PENDING'      -- PENDING, RUNNING, COMPLETED, FAILED
+        CHECK(status IN ('PENDING', 'RUNNING', 'COMPLETED', 'FAILED')),
+    attempts INTEGER NOT NULL DEFAULT 0,
+    max_attempts INTEGER NOT NULL DEFAULT 3,    -- Max number of retries
+    last_attempt_at TEXT,                       -- ISO8601 timestamp
+    last_error TEXT,                            -- Store error message if failed
+    priority INTEGER NOT NULL DEFAULT 0,        -- For future use (0 = normal)
+    created_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%dT%H:%M:%fZ', 'NOW')), -- ISO8601 timestamp UTC
+    updated_at TEXT NOT NULL DEFAULT (STRFTIME('%Y-%m-%dT%H:%M:%fZ', 'NOW'))  -- ISO8601 timestamp UTC
+);
+''',
+  r'''
+CREATE INDEX IF NOT EXISTS idx_background_jobs_status_priority ON background_service_jobs (status, priority, created_at);
+''',
+  r'''
+CREATE TRIGGER IF NOT EXISTS trg_background_service_jobs_updated_at
+AFTER UPDATE ON background_service_jobs
+FOR EACH ROW
+BEGIN
+    UPDATE background_service_jobs SET updated_at = STRFTIME('%Y-%m-%dT%H:%M:%fZ', 'NOW') WHERE id = OLD.id;
+END;
 ''',
 ];

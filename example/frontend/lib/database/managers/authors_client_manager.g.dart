@@ -19,7 +19,7 @@ class AuthorsManager extends ClientManager<AuthorModel> {
     required super.fromSqliteFactory,
   }) : super(
           tableName: 'authors',
-          localTableName: 'authors_local',
+          localTableName: 'authors',
         );
 }
 

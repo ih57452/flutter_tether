@@ -71,21 +71,20 @@ class UserPreferencesManager {
       'SELECT preference_value FROM $_tableName WHERE preference_key = ?',
       [key],
     );
+    // If row is null, the key doesn't exist.
+    if (row == null) return null; 
     final rawValue = row['preference_value'] as String?;
     if (rawValue == null) {
-      // This case implies that null was explicitly stored and jsonEncode(null) resulted in "null" which was then stored.
-      // Or, if preference_value can be truly NULL in DB for a key, this handles it.
       try {
         return fromJson(null);
       } catch (_) {
         return null;
-      } // Allow fromJson to handle null if it wants
+      }
     }
     try {
       final jsonData = jsonDecode(rawValue);
       return fromJson(jsonData);
     } catch (e, s) {
-      // Consider logging this error more formally if a logger is available here
       print('Error decoding preference for key "$key": $e$s');
       return null;
     }
@@ -156,6 +155,28 @@ class UserPreferencesManager {
   /// Deletes a user preference by its key.
   Future<void> deletePreference(String key) async {
     await db.execute('DELETE FROM $_tableName WHERE preference_key = ?', [key]);
+  }
+
+  /// Ensures that a set of default preferences are set if they don't already exist.
+  /// [defaultSettings]: A map where keys are preference keys and values are records
+  /// containing the default `value` and `valueType`.
+  Future<void> ensureDefaultPreferences(
+    Map<String, ({Object value, String valueType})> defaultSettings,
+  ) async {
+    for (final entry in defaultSettings.entries) {
+      final key = entry.key;
+      final defaultValue = entry.value.value;
+      final valueType = entry.value.valueType;
+
+      final existing = await getRawPreference(key);
+      if (existing == null) {
+        // Key does not exist, set the default
+        // Using <dynamic> for T in setPreference as defaultValue is Object.
+        // jsonEncode within setPreference will handle various types.
+        await setPreference<dynamic>(key, defaultValue, valueType: valueType);
+        print('Set default preference for key "$key"');
+      }
+    }
   }
 }
 

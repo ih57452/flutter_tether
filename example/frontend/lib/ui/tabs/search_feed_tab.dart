@@ -102,8 +102,6 @@ class _SearchFeedTabState extends ConsumerState<SearchFeedTab> {
     final settings = ref.read(bookSearchSettingsProvider);
     final asyncValue = ref.watch(booksFeedProvider(settings));
 
-    print("Async Value: ${asyncValue.error}"); // For debugging
-
     return Column(
       children: [
         Padding(

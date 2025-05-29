@@ -1,10 +1,10 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // Migration version: 1
-// Generated on 2025-05-24 15:29:14.910746
+// Generated on 2025-05-29 10:05:14.711013
 
 const List<String> migrationSqlStatementsV1 = [
   '''-- Initial Schema (Version 1)''',
-  '''-- Generated on 2025-05-24 15:29:14.896''',
+  '''-- Generated on 2025-05-29 10:05:14.704435''',
   r'''
 CREATE TABLE IF NOT EXISTS "bookstores" (
   "address" TEXT,
@@ -125,5 +125,21 @@ CREATE INDEX IF NOT EXISTS "idx_bookstore_books_book_id" ON "bookstore_books" ("
 ''',
   r'''
 CREATE INDEX IF NOT EXISTS "idx_bookstore_books_bookstore_id" ON "bookstore_books" ("bookstore_id");
+''',
+  r'''
+CREATE TABLE IF NOT EXISTS "profiles" (
+  "avatar_url" TEXT,
+  "created_at" TEXT DEFAULT CURRENT_TIMESTAMP,
+  "full_name" TEXT,
+  "id" TEXT NOT NULL,
+  "updated_at" TEXT DEFAULT CURRENT_TIMESTAMP,
+  "username" TEXT UNIQUE,
+  "website" TEXT,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "users" ("id") ON DELETE CASCADE ON UPDATE NO ACTION
+);
+''',
+  r'''
+CREATE INDEX IF NOT EXISTS "idx_profiles_username" ON "profiles" ("username");
 ''',
 ];
