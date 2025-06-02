@@ -1,11 +1,11 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // Core Migration: Feed Item References
 // Migration version: 0000
-// Generated on 2025-05-29T10:05:14.686422
+// Generated on 2025-05-30T09:26:08.610328
 
 const List<String> migrationSqlStatementsV0000_core_feed = [
   '''-- Core Feed Item References Table (Version 0000)''',
-  '''-- Generated on 2025-05-29T10:05:14.686422''',
+  '''-- Generated on 2025-05-30T09:26:08.610328''',
   r'''
 CREATE TABLE IF NOT EXISTS feed_item_references (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS user_preferences (
 CREATE INDEX IF NOT EXISTS idx_user_preferences_key ON user_preferences (preference_key);
 ''',
   '''-- Core Background Service Job Queue Table (Version 0000)''',
-  '''-- Generated on 2025-05-29T10:05:14.686422''',
+  '''-- Generated on 2025-05-30T09:26:08.610328''',
   r'''
 CREATE TABLE IF NOT EXISTS background_service_jobs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

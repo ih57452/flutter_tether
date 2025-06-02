@@ -3,6 +3,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 import 'package:tether_libs/client_manager/manager/client_manager_models.dart';
+import 'package:tether_libs/models/supabase_select_builder_base.dart';
 import 'package:tether_libs/models/tether_model.dart';
 import 'package:tether_libs/models/table_info.dart';
 import 'package:tether_libs/utils/logger.dart' as tether_logger; // aliased
@@ -62,72 +63,72 @@ class RealtimeManager<TModel extends TetherModel<TModel>> {
        _log = tether_logger.Logger('RealtimeManager<$supabaseTableName>');
 
   // --- Configuration Methods ---
-  RealtimeManager<TModel> eq(String column, Object value) {
+  RealtimeManager<TModel> eq(TetherColumn column, Object value) {
     _filterConfig = RealtimeManagerFilterConfig(
-      column: column,
+      column: column.originalName,
       value: value,
       type: RealtimeManagerFilterType.eq,
     );
     return this;
   }
 
-  RealtimeManager<TModel> neq(String column, Object value) {
+  RealtimeManager<TModel> neq(TetherColumn column, Object value) {
     _filterConfig = RealtimeManagerFilterConfig(
-      column: column,
+      column: column.originalName,
       value: value,
       type: RealtimeManagerFilterType.neq,
     );
     return this;
   }
 
-  RealtimeManager<TModel> lt(String column, Object value) {
+  RealtimeManager<TModel> lt(TetherColumn column, Object value) {
     _filterConfig = RealtimeManagerFilterConfig(
-      column: column,
+      column: column.originalName,
       value: value,
       type: RealtimeManagerFilterType.lt,
     );
     return this;
   }
 
-  RealtimeManager<TModel> lte(String column, Object value) {
+  RealtimeManager<TModel> lte(TetherColumn column, Object value) {
     _filterConfig = RealtimeManagerFilterConfig(
-      column: column,
+      column: column.originalName,
       value: value,
       type: RealtimeManagerFilterType.lte,
     );
     return this;
   }
 
-  RealtimeManager<TModel> gt(String column, Object value) {
+  RealtimeManager<TModel> gt(TetherColumn column, Object value) {
     _filterConfig = RealtimeManagerFilterConfig(
-      column: column,
+      column: column.originalName,
       value: value,
       type: RealtimeManagerFilterType.gt,
     );
     return this;
   }
 
-  RealtimeManager<TModel> gte(String column, Object value) {
+  RealtimeManager<TModel> gte(TetherColumn column, Object value) {
     _filterConfig = RealtimeManagerFilterConfig(
-      column: column,
+      column: column.originalName,
       value: value,
       type: RealtimeManagerFilterType.gte,
     );
     return this;
   }
 
-  RealtimeManager<TModel> inFilter(String column, List<Object> values) {
+  RealtimeManager<TModel> inFilter(TetherColumn column, List<Object> values) {
     _filterConfig = RealtimeManagerFilterConfig(
-      column: column,
+      column: column.originalName,
       value: values,
       type: RealtimeManagerFilterType.inFilter,
     );
     return this;
   }
 
-  RealtimeManager<TModel> order(String column, {bool ascending = true}) {
+  RealtimeManager<TModel> order(TetherColumn column, {bool ascending = true}) {
     _orderConfig = RealtimeManagerOrderConfig(
-      column: column,
+      column: column.originalName,
       ascending: ascending,
     );
     return this;

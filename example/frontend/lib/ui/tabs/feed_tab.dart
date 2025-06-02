@@ -6,7 +6,7 @@ import 'package:example/database/supabase_select_builders.dart';
 import 'package:example/models/selects.dart';
 import 'package:example/database/managers/books_client_manager.g.dart';
 import 'package:example/database/managers/genres_client_manager.g.dart';
-import 'package:tether_libs/client_manager/client_manager_filter_builder.dart';
+import 'package:tether_libs/client_manager/manager/client_manager_filter_builder.dart';
 
 // Provider to fetch all genres
 final allGenresProvider = FutureProvider<List<GenreModel>>((ref) async {

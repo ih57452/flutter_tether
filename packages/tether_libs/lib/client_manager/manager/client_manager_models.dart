@@ -43,7 +43,7 @@ enum SqlOperationType {
 /// ```
 class OrderTerm {
   /// The Supabase column to order by.
-  final SupabaseColumn column;
+  final TetherColumn column;
 
   /// Whether the order should be ascending (true) or descending (false).
   final bool ascending;
@@ -62,7 +62,7 @@ class OrderTerm {
   ///
   /// * [column] - The column to order by
   /// * [nullsFirst] - Whether NULL values should appear first (default: false)
-  factory OrderTerm.asc(SupabaseColumn column, {bool nullsFirst = false}) {
+  factory OrderTerm.asc(TetherColumn column, {bool nullsFirst = false}) {
     return OrderTerm(column, ascending: true, nullsFirst: nullsFirst);
   }
 
@@ -70,7 +70,7 @@ class OrderTerm {
   ///
   /// * [column] - The column to order by
   /// * [nullsFirst] - Whether NULL values should appear first (default: false)
-  factory OrderTerm.desc(SupabaseColumn column, {bool nullsFirst = false}) {
+  factory OrderTerm.desc(TetherColumn column, {bool nullsFirst = false}) {
     return OrderTerm(column, ascending: false, nullsFirst: nullsFirst);
   }
 
@@ -605,7 +605,7 @@ class ClientManagerSqlUtils {
   /// Adds an ORDER BY clause to a SqlStatement. Replaces existing ORDER BY.
   static SqlStatement applyOrder(
     SqlStatement statement,
-    SupabaseColumn column, {
+    TetherColumn column, {
     bool ascending = true,
     bool nullsFirst = false,
   }) {

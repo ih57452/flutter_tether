@@ -72,58 +72,63 @@ class ConfigLoader {
 
       // Updated sample config content
       const String sampleConfigContent = """
-# --- Database Connection Details ---
-# Specifies how to connect to your Supabase (<PostgreSQL>) database to read its schema.
-# Values for database connection are loaded from environment variables.
-# Create a .env file in the root of the 'tether' package (or specify its path)
-# with the actual credentials.
 database:
-  host_env_var: SUPABASE_DB_HOST          # Default: SUPABASE_DB_HOST
-  port_env_var: SUPABASE_DB_PORT          # Default: SUPABASE_DB_PORT
-  database_env_var: SUPABASE_DB_NAME      # Default: SUPABASE_DB_NAME
-  username_env_var: SUPABASE_DB_USER      # Default: SUPABASE_DB_USER
-  password_env_var: SUPABASE_DB_PASSWORD  # Default: SUPABASE_DB_PASSWORD
-  ssl: false                              # SSL for DB connection (can also be an env var if needed)
+  host: TETHER_SUPABASE_HOST 
+  port: TETHER_PORT_NAME 
+  database: TETHER_DB_NAME 
+  username: TETHER_DB_USERNAME 
+  password: TETHER_DB_PASSWORD 
+  ssl: TETHER_SSL 
 
-# --- General Code Generation Settings ---
 generation:
   output_directory: lib/database
   exclude_tables:
     - migrations 
-    - schema_migrations
+    - schema_migrations 
   include_tables: []
   exclude_references: []
   generate_for_all_tables: true
+
   dbClassName: AppDb
   databaseName: 'app_db.sqlite'
-  database_import_path: 'package:example/database/database.dart' # Adjust 'example' to your actual package name.
+
   models:
-    enabled: true
+    enabled: true 
     filename: models.g.dart
     prefix: ''
     suffix: Model
     use_null_safety: true
+
+  supabase_selectors:
+    enabled: true 
+
   supabase_select_builders:
-    enabled: true
+    enabled: true 
     filename: 'supabase_select_builders.g.dart'
-    generated_schema_dart_file_path: 'lib/database/supabase_schema.g.dart'
+    generated_schema_dart_file_name: 'supabase_schema.g.dart'
     suffix: SelectBuilder
-  supabase_select_builders_import_path: 'package:example/database/supabase_select_builders.g.dart' # Adjust 'example'
-  schema_registry_file_path: 'lib/database/schema_registry.g.dart'
+
+  schema_registry_file_name: 'schema_registry.g.dart'
+
   sqlite_migrations:
-    enabled: true
-    output_subdir: 'sqlite_migrations' # Typically 'assets/sqlite_migrations' or 'lib/database/migrations'
+    enabled: true 
+    output_subdir: 'sqlite_migrations'
+
   client_managers:
-    enabled: true
+    enabled: true 
     use_riverpod: true
+
   providers:
-    enabled: true
+    enabled: true 
     output_subdir: 'providers'
-  authentication: # Top-level key
+
+  authentication:
     enabled: true
-    profile_table: 'profiles'
-  background_services: # Top-level key
+    profile_table: 'profiles' 
+
+  background_services:
     enabled: true
+
   sanitization_endings:
     - _id
     - _fk

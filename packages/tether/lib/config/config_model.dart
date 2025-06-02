@@ -37,7 +37,6 @@ class SupabaseGenConfig {
   // --- SSchema Settings ---
   final String schemaRegistryFilePath;
   final String databaseImportPath;
-  final String supabaseSelectBuildersImportPath;
   final List<String> sanitizationEndings;
 
   // --- ClientManager Settings ---
@@ -92,8 +91,7 @@ class SupabaseGenConfig {
     // NEW FIELDS
     this.schemaRegistryFilePath = 'lib/database/schema_registry.dart',
     this.databaseImportPath = '../database/my_database.dart',
-    this.supabaseSelectBuildersImportPath =
-        '../database/supabase_select_builders.dart',
+
     this.sanitizationEndings = const ['_id', '_fk'],
 
     // --- ClientManager Settings ---
@@ -178,14 +176,16 @@ class SupabaseGenConfig {
           selectBuildersConfig['output_path'] as String? ??
           p.join(outputDir, 'supabase_select_builders.dart'),
       generatedSupabaseSchemaDartFilePath:
-          selectBuildersConfig['generated_schema_dart_file_path'] as String? ??
+          p.join(
+                outputDir,
+                selectBuildersConfig['generated_schema_dart_file_name'],
+              )
+              as String? ??
           p.join(outputDir, 'supabase_schema.dart'),
       schemaRegistryFilePath:
-          genConfig['schema_registry_file_path'] as String? ??
+          p.join(outputDir, genConfig['schema_registry_file_name'])
+              as String? ??
           p.join(outputDir, 'schema_registry.dart'),
-      supabaseSelectBuildersImportPath:
-          genConfig['supabase_select_builders_import_path'] as String? ??
-          '../supabase_select_builders.dart',
       sanitizationEndings: List<String>.from(
         genConfig['sanitization_endings'] as List? ?? ['_id', '_fk'],
       ),

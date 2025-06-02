@@ -1,88 +1,213 @@
 import 'package:sqlite_async/sqlite3_common.dart';
 
-/// Abstract base class for data models representing database table rows.
+/// An abstract base class for all data models managed by the Tether system.
 ///
-/// Concrete implementations (typically generated) should:
-/// 1. Define final fields corresponding to table columns.
-/// 2. Provide a constructor to initialize all fields.
-/// 3. Implement the `toJson` method for serialization to JSON (e.g., for Supabase).
-/// 4. Implement the `toSqlite` method for serialization to a map suitable for SQLite.
-/// 5. Implement `copyWith` for creating modified copies.
-/// 6. Override `toString`, `operator ==`, and `hashCode` for debugging and equality checks.
-/// 7. **By convention, provide `fromJson` and `fromSqlite` factory constructors**
-///    for deserialization from different data sources. These cannot be enforced
-///    by the abstract class itself but are essential for using the models effectively.
+/// `TetherModel` provides a common interface for models that can be serialized
+/// to and from JSON (for network communication, e.g., with Supabase) and
+/// an SQLite-compatible format (for local database persistence).
+///
+/// Subclasses must implement:
+/// - `toJson()`: To serialize the model to a JSON map.
+/// - `toSqlite()`: To serialize the model to a map suitable for SQLite insertion/update.
+///   This might involve converting complex types (like `DateTime` or enums) to
+///   SQLite-compatible types (like ISO8601 strings or integers).
+/// - `copyWith(...)`: A method to create a new instance of the model with some
+///   fields updated. The actual parameters for `copyWith` should be specific to the
+///   subclass and its properties.
+/// - A `static fromJson(Map<String, dynamic> json)` factory constructor (or equivalent)
+///   for deserializing from JSON.
+/// - A `static fromSqlite(Row sqliteData)` factory constructor (or equivalent)
+///   for deserializing from an SQLite `Row`.
+///
+/// The generic type `T` should be the type of the implementing class itself, enabling
+/// type-safe `copyWith` and factory methods.
+///
+/// Example (conceptual subclass):
+/// ```dart
+/// class MyData extends TetherModel<MyData> {
+///   final int id;
+///   final String name;
+///   final DateTime createdAt;
+///
+///   MyData({required this.id, required this.name, required this.createdAt})
+///       : super({'id': id, 'name': name, 'created_at': createdAt.toIso8601String()});
+///
+///   MyData.fromData(Map<String, dynamic> data)
+///       : id = data['id'] as int,
+///         name = data['name'] as String,
+///         createdAt = DateTime.parse(data['created_at'] as String),
+///         super(data);
+///
+///   @override
+///   dynamic get localId => id;
+///
+///   @override
+///   Map<String, dynamic> toJson() => {
+///         'id': id,
+///         'name': name,
+///         'created_at': createdAt.toIso8601String(),
+///       };
+///
+///   @override
+///   Map<String, dynamic> toSqlite() => {
+///         'id': id,
+///         'name': name,
+///         'created_at': createdAt.toIso8601String(), // SQLite stores as TEXT
+///       };
+///
+///   @override
+///   MyData copyWith({int? id, String? name, DateTime? createdAt}) =>
+///       MyData(
+///         id: id ?? this.id,
+///         name: name ?? this.name,
+///         createdAt: createdAt ?? this.createdAt,
+///       );
+///
+///   static MyData fromJson(Map<String, dynamic> json) => MyData(
+///         id: json['id'] as int,
+///         name: json['name'] as String,
+///         createdAt: DateTime.parse(json['created_at'] as String),
+///       );
+///
+///   static MyData fromSqlite(Row row) => MyData(
+///         id: row['id'] as int,
+///         name: row['name'] as String,
+///         createdAt: DateTime.parse(row['created_at'] as String),
+///       );
+///
+///   @override
+///   String toString() => 'MyData(id: $id, name: $name, createdAt: $createdAt)';
+/// }
+/// ```
 abstract class TetherModel<T> {
+  /// The underlying data map holding the model's properties.
+  /// Subclasses should initialize this in their constructors.
   final Map<String, dynamic> data;
 
+  /// Constructs a [TetherModel] with the given `data` map.
   TetherModel(this.data);
 
-  /// The primary identifier for the model instance, typically mapping to a primary key.
-  /// Type can be String, int, etc., depending on the specific table.
+  /// Provides access to the local identifier of the model instance.
+  /// This typically corresponds to the primary key in the local SQLite database
+  /// (e.g., 'id').
+  /// Subclasses should override this if their primary key column is named differently.
   dynamic get localId => data['id'];
 
-  /// Converts the model instance into a JSON map (Map<String, dynamic>).
+  /// Serializes the model instance to a JSON-compatible [Map].
   ///
-  /// This map typically uses snake_case keys corresponding to database column names
-  /// and is suitable for sending data to APIs (like Supabase).
-  /// DateTime objects should usually be converted to ISO 8601 strings.
+  /// This map is typically used for sending data to a remote server (e.g., Supabase).
+  /// It should represent the model in the format expected by the backend.
   Map<String, dynamic> toJson();
 
-  /// Converts the model instance into a map (Map<String, dynamic>) suitable for
-  /// inserting or updating in an SQLite database.
+  /// Serializes the model instance to a [Map] suitable for insertion or update
+  /// into an SQLite database.
   ///
-  /// This map typically uses snake_case keys corresponding to database column names.
-  /// DateTime objects might be stored as ISO 8601 strings or Unix timestamps (integers),
-  /// depending on the database schema and chosen serialization strategy.
-  /// Boolean values are typically stored as integers (0 or 1).
-  Map<String, dynamic> toSqlite(); // Added abstract method
+  /// This method should handle any necessary type conversions, such as:
+  /// - `DateTime` to ISO8601 `String` or Unix timestamp `int`.
+  /// - `bool` to `int` (0 or 1).
+  /// - Enums to `String` or `int`.
+  /// - Custom objects to a storable format (e.g., JSON string).
+  Map<String, dynamic> toSqlite();
 
-  /// Creates a copy of this model instance, allowing specific fields to be
-  /// overridden with new values.
+  /// Creates a new instance of the model [T] with updated properties.
   ///
-  /// Implementations should return an instance of the concrete model type (`T`).
-  /// Parameters should be optional and named, corresponding to the model's fields.
+  /// Subclasses must implement this method, providing specific named, optional
+  /// parameters for each field that can be copied/updated.
+  ///
+  /// Example for a `User` model:
+  /// ```dart
+  /// User copyWith({String? name, int? age}) {
+  ///   return User(
+  ///     name: name ?? this.name,
+  ///     age: age ?? this.age,
+  ///     // other fields...
+  ///   );
+  /// }
+  /// ```
   T copyWith(/* Specific named, optional parameters defined in subclass */);
 
-  /// Returns a string representation of the model instance, typically including
-  /// the class name and the values of its fields. Useful for debugging.
+  /// Provides a string representation of the model instance.
+  /// It is recommended that subclasses override this to provide a meaningful output.
   @override
   String toString();
 
+  /// A generic factory constructor to create a `TetherModel` instance from a JSON map.
+  ///
+  /// **Note:** This default factory returns a `_GenericTetherModel` which provides
+  /// basic pass-through serialization. For type-safe deserialization into specific
+  /// model types (e.g., `User`, `Product`), each subclass **must** provide its own
+  /// `static YourModelType fromJson(Map<String, dynamic> json)` factory.
+  /// This generic factory is primarily a placeholder or for internal use where
+  /// the specific type `T` is not critical at the point of creation but is expected
+  /// to be cast or handled by a more specific mechanism later.
+  ///
+  /// It is **strongly recommended** to use the specific `fromJson` factories
+  /// in your application code: `YourModel.fromJson(json)`.
   factory TetherModel.fromJson(Map<String, dynamic> json) {
-    // Filter the JSON to include only columns defined in the schema
-
-    // Return a new instance of TetherModel with the filtered data
+    // This acts as a fallback or a way to handle dynamic model creation
+    // if the concrete type isn't known at compile time for the factory call.
+    // However, direct use of subclass-specific fromJson is preferred.
     return _GenericTetherModel(json) as TetherModel<T>;
   }
 
+  /// A generic factory constructor to create a `TetherModel` instance from an SQLite `Row`.
+  ///
+  /// **Note:** Similar to `TetherModel.fromJson`, this default factory returns a
+  /// `_GenericTetherModel`. For type-safe deserialization from SQLite into specific
+  /// model types, each subclass **must** provide its own
+  /// `static YourModelType fromSqlite(Row sqliteData)` factory.
+  ///
+  /// It is **strongly recommended** to use the specific `fromSqlite` factories
+  /// in your application code: `YourModel.fromSqlite(row)`.
   factory TetherModel.fromSqlite(Row sqliteData) {
-    // Filter the SQLite data to include only columns defined in the schema
-
-    // Return a new instance of TetherModel with the filtered data
-    return _GenericTetherModel(sqliteData) as TetherModel<T>;
+    // The Row object from sqlite_async is already a Map<String, dynamic> like structure.
+    // However, to be explicit and ensure we have a standard Map, we can create one from it.
+    // If Row itself can be directly used as Map<String, dynamic> in all contexts,
+    // this conversion might be simplified, but creating a new map is safer.
+    final Map<String, dynamic> mapData = Map<String, dynamic>.from(sqliteData);
+    return _GenericTetherModel(mapData) as TetherModel<T>;
   }
 }
 
+/// A generic, non-abstract implementation of [TetherModel].
+///
+/// This class provides basic implementations for `toJson`, `toSqlite`, and `copyWith`.
+/// It is used by the default factory constructors in `TetherModel` and can serve
+/// as a simple model if no specific subclass behavior (beyond data storage and
+/// pass-through serialization) is needed.
+///
+/// However, for most use cases, you should create specific subclasses of `TetherModel`
+/// with strongly-typed fields and tailored `fromJson`/`fromSqlite` factories.
 class _GenericTetherModel extends TetherModel<dynamic> {
+  /// Creates a `_GenericTetherModel` with the provided `data` map.
   _GenericTetherModel(super.data);
 
-  @override
-  dynamic get _id => data['id']; // Assuming 'id' is the primary key column
+  // No specific localId override, uses TetherModel.data['id'] by default.
 
+  /// Returns a shallow copy of the internal `data` map.
   @override
   Map<String, dynamic> toJson() {
     return Map<String, dynamic>.from(data);
   }
 
+  /// Returns a shallow copy of the internal `data` map.
+  /// Assumes data is already in an SQLite-compatible format.
+  /// For complex types, subclasses should override `toSqlite` for proper conversion.
   @override
   Map<String, dynamic> toSqlite() {
-    // Convert the data to a format suitable for SQLite (e.g., handle DateTime, booleans)
     return Map<String, dynamic>.from(data);
   }
 
+  /// Creates a new `_GenericTetherModel` by merging the current `data` with `newData`.
+  ///
+  /// If `newData` is provided, its key-value pairs will overwrite those in the current `data`.
   @override
   _GenericTetherModel copyWith({Map<String, dynamic>? newData}) {
     return _GenericTetherModel({...data, ...?newData});
+  }
+
+  @override
+  String toString() {
+    return '_GenericTetherModel($data)';
   }
 }

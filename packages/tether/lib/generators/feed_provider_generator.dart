@@ -29,8 +29,8 @@ import 'package:tether_libs/models/tether_model.dart';
 import 'package:tether_libs/utils/logger.dart';
 import 'package:sqlite_async/sqlite3_common.dart';
 import 'package:tether_libs/client_manager/client_manager.dart';
-import 'package:tether_libs/client_manager/client_manager_filter_builder.dart';
-import 'package:tether_libs/client_manager/client_manager_models.dart';
+import 'package:tether_libs/client_manager/manager/client_manager_filter_builder.dart';
+import 'package:tether_libs/client_manager/manager/client_manager_models.dart';
 import 'package:sqlite_async/sqlite_async.dart'; // Ensure SqliteDatabase is imported
 
 import '../database.dart';

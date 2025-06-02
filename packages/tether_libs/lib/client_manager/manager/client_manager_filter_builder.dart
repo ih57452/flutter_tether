@@ -60,7 +60,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   // --- Filter Implementations using ClientManagerSqlUtils.applyWhere ---
 
   /// Finds all rows whose value on the stated [column] matches the specified [value].
-  ClientManagerFilterBuilder<TModel> eq(SupabaseColumn column, Object value) {
+  ClientManagerFilterBuilder<TModel> eq(TetherColumn column, Object value) {
     final newSupabaseBuilder = supabase.eq(column.fullyQualified, value);
     SqlStatement? newlocalQuery = localQuery; // Use correct field name
     // Check if localQuery is not null before applying WHERE
@@ -86,7 +86,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   }
 
   /// Finds all rows whose value on the stated [column] does not match the specified [value].
-  ClientManagerFilterBuilder<TModel> neq(SupabaseColumn column, Object value) {
+  ClientManagerFilterBuilder<TModel> neq(TetherColumn column, Object value) {
     final newSupabaseBuilder = supabase.neq(column.fullyQualified, value);
     SqlStatement? newlocalQuery = localQuery;
     if (localQuery != null) {
@@ -107,7 +107,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   }
 
   /// Finds all rows whose value on the stated [column] is greater than the specified [value].
-  ClientManagerFilterBuilder<TModel> gt(SupabaseColumn column, Object value) {
+  ClientManagerFilterBuilder<TModel> gt(TetherColumn column, Object value) {
     final newSupabaseBuilder = supabase.gt(column.fullyQualified, value);
     SqlStatement? newlocalQuery = localQuery;
     if (localQuery != null) {
@@ -128,7 +128,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   }
 
   /// Finds all rows whose value on the stated [column] is greater than or equal to the specified [value].
-  ClientManagerFilterBuilder<TModel> gte(SupabaseColumn column, Object value) {
+  ClientManagerFilterBuilder<TModel> gte(TetherColumn column, Object value) {
     final newSupabaseBuilder = supabase.gte(column.fullyQualified, value);
     SqlStatement? newlocalQuery = localQuery;
     if (localQuery != null) {
@@ -149,7 +149,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   }
 
   /// Finds all rows whose value on the stated [column] is less than the specified [value].
-  ClientManagerFilterBuilder<TModel> lt(SupabaseColumn column, Object value) {
+  ClientManagerFilterBuilder<TModel> lt(TetherColumn column, Object value) {
     final newSupabaseBuilder = supabase.lt(column.fullyQualified, value);
     SqlStatement? newlocalQuery = localQuery;
     if (localQuery != null) {
@@ -170,7 +170,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   }
 
   /// Finds all rows whose value on the stated [column] is less than or equal to the specified [value].
-  ClientManagerFilterBuilder<TModel> lte(SupabaseColumn column, Object value) {
+  ClientManagerFilterBuilder<TModel> lte(TetherColumn column, Object value) {
     final newSupabaseBuilder = supabase.lte(column.fullyQualified, value);
     SqlStatement? newlocalQuery = localQuery;
     if (localQuery != null) {
@@ -191,10 +191,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   }
 
   /// Finds all rows whose value in the stated [column] matches the supplied [pattern].
-  ClientManagerFilterBuilder<TModel> like(
-    SupabaseColumn column,
-    String pattern,
-  ) {
+  ClientManagerFilterBuilder<TModel> like(TetherColumn column, String pattern) {
     final newSupabaseBuilder = supabase.like(column.fullyQualified, pattern);
     SqlStatement? newlocalQuery = localQuery;
     if (localQuery != null) {
@@ -216,7 +213,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// Finds all rows whose value in the stated [column] matches the supplied [pattern] case-insensitively.
   ClientManagerFilterBuilder<TModel> ilike(
-    SupabaseColumn column,
+    TetherColumn column,
     String pattern,
   ) {
     final newSupabaseBuilder = supabase.ilike(column.fullyQualified, pattern);
@@ -241,7 +238,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// A check for exact equality (null, true, false).
   ClientManagerFilterBuilder<TModel> isFilter(
-    SupabaseColumn column,
+    TetherColumn column,
     bool? value,
   ) {
     final newSupabaseBuilder = supabase.isFilter(column.fullyQualified, value);
@@ -273,7 +270,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// Finds all rows whose value on the stated [column] is found on the specified [values].
   ClientManagerFilterBuilder<TModel> inFilter(
-    SupabaseColumn column,
+    TetherColumn column,
     List values,
   ) {
     final newSupabaseBuilder = supabase.inFilter(column.fullyQualified, values);
@@ -308,7 +305,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// Finds all rows whose json/text value on the stated [column] contains the specified [value].
   ClientManagerFilterBuilder<TModel> contains(
-    SupabaseColumn column,
+    TetherColumn column,
     Object value,
   ) {
     final newSupabaseBuilder = supabase.contains(column.fullyQualified, value);
@@ -340,7 +337,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// Finds all rows whose json/text value on the stated [column] is contained by the specified [value].
   ClientManagerFilterBuilder<TModel> containedBy(
-    SupabaseColumn column,
+    TetherColumn column,
     Object value,
   ) {
     final newSupabaseBuilder = supabase.containedBy(
@@ -377,7 +374,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   // These would require specific schema (e.g., start/end columns) or extensions
 
   ClientManagerFilterBuilder<TModel> rangeLt(
-    SupabaseColumn column,
+    TetherColumn column,
     String range,
   ) {
     final newSupabaseBuilder = supabase.rangeLt(column.fullyQualified, range);
@@ -392,7 +389,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   }
 
   ClientManagerFilterBuilder<TModel> rangeGt(
-    SupabaseColumn column,
+    TetherColumn column,
     String range,
   ) {
     final newSupabaseBuilder = supabase.rangeGt(column.fullyQualified, range);
@@ -406,7 +403,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   }
 
   ClientManagerFilterBuilder<TModel> rangeGte(
-    SupabaseColumn column,
+    TetherColumn column,
     String range,
   ) {
     final newSupabaseBuilder = supabase.rangeGte(column.fullyQualified, range);
@@ -420,7 +417,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   }
 
   ClientManagerFilterBuilder<TModel> rangeLte(
-    SupabaseColumn column,
+    TetherColumn column,
     String range,
   ) {
     final newSupabaseBuilder = supabase.rangeLte(column.fullyQualified, range);
@@ -434,7 +431,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   }
 
   ClientManagerFilterBuilder<TModel> rangeAdjacent(
-    SupabaseColumn column,
+    TetherColumn column,
     String range,
   ) {
     final newSupabaseBuilder = supabase.rangeAdjacent(
@@ -452,7 +449,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// Finds all rows whose array/range value overlaps. Basic string implementation.
   ClientManagerFilterBuilder<TModel> overlaps(
-    SupabaseColumn column,
+    TetherColumn column,
     Object value,
   ) {
     final newSupabaseBuilder = supabase.overlaps(column.fullyQualified, value);
@@ -470,7 +467,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// Finds all rows matching the FTS query. Requires an FTS table (e.g., FTS5).
   ClientManagerFilterBuilder<TModel> textSearch(
-    SupabaseColumn column,
+    TetherColumn column,
     String query, {
     String? config, // config is PostgreSQL specific, ignored for SQLite
     TextSearchType? type, // type is PostgreSQL specific, ignored for SQLite
@@ -507,7 +504,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   /// Finds all rows which doesn't satisfy the filter.
   /// NOTE: This implementation is basic and might require parentheses management for complex cases.
   ClientManagerFilterBuilder<TModel> not(
-    SupabaseColumn column,
+    TetherColumn column,
     String operator,
     Object? value,
   ) {
@@ -589,7 +586,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// Finds all rows whose [column] satisfies the filter. Maps PostgREST operators.
   ClientManagerFilterBuilder<TModel> filter(
-    SupabaseColumn column,
+    TetherColumn column,
     String operator,
     Object? value,
   ) {
@@ -749,7 +746,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
   // Helper for LIKE/ILIKE Any/All
   SqlStatement _buildLikeAnyAllLocal(
     SqlStatement currentState,
-    SupabaseColumn column,
+    TetherColumn column,
     List<String> patterns,
     String joinOperator,
   ) {
@@ -771,7 +768,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// Match only rows where [column] matches all of [patterns] case-sensitively.
   ClientManagerFilterBuilder<TModel> likeAllOf(
-    SupabaseColumn column,
+    TetherColumn column,
     List<String> patterns,
   ) {
     final newSupabaseBuilder = supabase.likeAllOf(
@@ -798,7 +795,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// Match only rows where [column] matches any of [patterns] case-sensitively.
   ClientManagerFilterBuilder<TModel> likeAnyOf(
-    SupabaseColumn column,
+    TetherColumn column,
     List<String> patterns,
   ) {
     final newSupabaseBuilder = supabase.likeAnyOf(
@@ -825,7 +822,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// Match only rows where [column] matches all of [patterns] case-insensitively.
   ClientManagerFilterBuilder<TModel> ilikeAllOf(
-    SupabaseColumn column,
+    TetherColumn column,
     List<String> patterns,
   ) {
     final newSupabaseBuilder = supabase.ilikeAllOf(
@@ -851,7 +848,7 @@ class ClientManagerFilterBuilder<TModel extends TetherModel<TModel>>
 
   /// Match only rows where [column] matches any of [patterns] case-insensitively.
   ClientManagerFilterBuilder<TModel> ilikeAnyOf(
-    SupabaseColumn column,
+    TetherColumn column,
     List<String> patterns,
   ) {
     final newSupabaseBuilder = supabase.ilikeAnyOf(

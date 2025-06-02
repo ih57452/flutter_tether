@@ -31,31 +31,65 @@ class BackgroundJob {
   });
 
   factory BackgroundJob.fromMap(Map<String, dynamic> map) {
-    dynamic decodedPayload;
-    if (map['payload'] != null) {
-      try {
-        decodedPayload = jsonDecode(map['payload'] as String);
-      } catch (e) {
-        // If payload is not valid JSON, store as null or handle error
-        log('Error decoding job payload for job id ${map['id']}: $e');
-        decodedPayload = null;
+    final jobIdForLog = map.containsKey('id') && map['id'] != null
+        ? map['id'].toString()
+        : 'unknown_id';
+
+    Map<String, dynamic>? decodedPayload;
+    final rawPayload = map['payload'];
+    if (rawPayload != null) {
+      if (rawPayload is String) {
+        try {
+          final jsonData = jsonDecode(rawPayload);
+          if (jsonData is Map<String, dynamic>) {
+            decodedPayload = jsonData;
+          } else {
+            log('Warning: Decoded JSON payload for job id $jobIdForLog is not a Map<String, dynamic>. Type: ${jsonData.runtimeType}');
+          }
+        } catch (e) {
+          log('Error decoding JSON string payload for job id $jobIdForLog: $e. Payload: $rawPayload');
+        }
+      } else if (rawPayload is Map<String, dynamic>) {
+        decodedPayload = rawPayload;
+      } else {
+        log('Warning: Payload for job id $jobIdForLog is not a JSON string or a Map. Type: ${rawPayload.runtimeType}. Payload: $rawPayload');
       }
+    }
+
+    BackgroundJobStatus statusValue;
+    final rawStatus = map['status'];
+    if (rawStatus is String) {
+      statusValue = BackgroundJobStatus.values.firstWhere(
+        (e) => e.name == rawStatus.toLowerCase(),
+        orElse: () {
+          log('Warning: Unknown status string "$rawStatus" for job id $jobIdForLog. Defaulting to pending.');
+          return BackgroundJobStatus.pending;
+        },
+      );
+    } else {
+      log('Warning: Status field for job id $jobIdForLog is not a string or is null (value: $rawStatus). Defaulting to pending.');
+      statusValue = BackgroundJobStatus.pending;
+    }
+
+    DateTime? parsedLastAttemptAt;
+    final rawLastAttemptAt = map['last_attempt_at'];
+    if (rawLastAttemptAt is String) {
+      parsedLastAttemptAt = DateTime.tryParse(rawLastAttemptAt);
+      if (parsedLastAttemptAt == null && rawLastAttemptAt.isNotEmpty) {
+        log('Warning: Could not parse last_attempt_at string "$rawLastAttemptAt" for job id $jobIdForLog.');
+      }
+    } else if (rawLastAttemptAt != null) {
+      log('Warning: last_attempt_at for job id $jobIdForLog was not a String (type: ${rawLastAttemptAt.runtimeType}, value: $rawLastAttemptAt). Interpreting as null.');
     }
 
     return BackgroundJob(
       id: map['id'] as int,
       jobKey: map['job_key'] as String,
-      payload: decodedPayload as Map<String, dynamic>?,
-      status: BackgroundJobStatus.values.firstWhere(
-        (e) => e.name == (map['status'] as String).toLowerCase(),
-        orElse: () => BackgroundJobStatus.pending,
-      ),
+      payload: decodedPayload,
+      status: statusValue,
       attempts: map['attempts'] as int,
-      maxAttempts: map['max_attempts'] as int? ?? 3, // Default if not in DB
-      lastAttemptAt:
-          map['last_attempt_at'] == null
-              ? null
-              : DateTime.tryParse(map['last_attempt_at'] as String),
+      maxAttempts: map['max_attempts'] as int? ?? 3, // Default if not in DB or not an int
+      lastAttemptAt: parsedLastAttemptAt,
       lastError: map['last_error'] as String?,
       priority: map['priority'] as int,
       createdAt: DateTime.parse(map['created_at'] as String),

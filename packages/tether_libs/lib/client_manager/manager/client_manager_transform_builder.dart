@@ -68,7 +68,7 @@ class ClientManagerTransformBuilder<TModel extends TetherModel<TModel>>
 
   /// Order the results.
   ClientManagerTransformBuilder<TModel> order(
-    SupabaseColumn column, {
+    TetherColumn column, {
     bool ascending = true,
     bool nullsFirst = false,
   }) {

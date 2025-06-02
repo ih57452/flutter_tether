@@ -18,8 +18,14 @@ generation:
   # Useful for excluding internal Supabase tables, migration history tables, or any other tables
   # for which you do not want Dart code generated.
   exclude_tables:
-    - migrations # Example: 'schema_migrations' or 'supabase_migrations.schema_migrations'
-    - schema_migrations # Example: 'pgmigrations'
+    - '_realtime.*'
+    - 'auth.*'
+    - 'net.*'
+    - 'pgsodium.*'
+    - 'realtime.*'
+    - 'storage.*'
+    - 'supabase_functions.*'
+    - 'vault.*'
 
   # If 'generate_for_all_tables' is false, only tables listed here will have code generated for them.
   # If 'generate_for_all_tables' is true, this list can be used to explicitly include tables that might
@@ -41,11 +47,7 @@ generation:
   dbClassName: AppDb
   # The filename for the local SQLite database if you are generating code that uses one.
   databaseName: 'app_db.sqlite'
-  # The Dart import path for your primary database access class.
-  # This is used by other generated files (like providers or managers) that need to
-  # reference your main database instance (e.g., where `SqliteDatabase` is initialized).
-  database_import_path: 'package:example/database/database.dart' # Adjust 'example' to your actual package name.
-
+ 
   # --- Model Generation Settings ---
   # Configuration for generating Dart data models from your Supabase tables.
   models:
@@ -83,21 +85,17 @@ generation:
     # The filename for the main generated select builders file.
     # This file will be placed within 'output_directory' unless 'output_path' is specified.
     filename: 'supabase_select_builders.g.dart'
+
     # The full path (relative to the project root) for the generated Dart file that will contain
     # the `globalSupabaseSchema` map. This map holds schema information used by the select builders at runtime.
-    generated_schema_dart_file_path: 'lib/database/supabase_schema.g.dart'
+    generated_schema_dart_file_name: 'supabase_schema.g.dart'
     # A suffix to add to all generated Select Builder class names. E.g., table 'users' + suffix 'SelectBuilder' -> 'UsersSelectBuilder'.
     suffix: SelectBuilder
-
-  # The Dart import path used by other generated files (like providers or client managers)
-  # to import the main Supabase Select Builders file generated above.
-  # This should be a valid package import path.
-  supabase_select_builders_import_path: 'package:example/database/supabase_select_builders.g.dart' # Adjust 'example' to your package name.
 
   # The full path (relative to the project root) for a generated "schema registry" file.
   # A schema registry might provide a centralized way to access table and column metadata,
   # potentially for more dynamic query building or ORM-like features.
-  schema_registry_file_path: 'lib/database/schema_registry.g.dart'
+  schema_registry_file_name: 'schema_registry.g.dart'
 
 
   # --- SQLite Migration Generation Settings ---

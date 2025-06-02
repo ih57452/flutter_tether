@@ -1,7 +1,7 @@
 name: tether
 description: "A command-line tool and builders for generating Supabase-related Dart code."
-version: 0.0.1
-homepage: # Add your homepage if you have one
+version: 1.0.0
+repository: https://github.com/cspecter/tether_libs
 
 environment:
   sdk: ^3.7.2

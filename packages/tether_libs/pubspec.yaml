@@ -1,8 +1,7 @@
 name: tether_libs
 description: "A library of Dart code for Tether, including database models, client managers, and more."
 version: 1.0.0
-
-homepage:
+repository: https://github.com/cspecter/tether_libs
 
 environment:
   sdk: ^3.7.2

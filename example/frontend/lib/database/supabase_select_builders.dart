@@ -6,15 +6,15 @@
 import 'package:tether_libs/models/supabase_select_builder_base.dart';
 import 'supabase_schema.dart'; // Import the generated schema
 
-enum BookstoresColumn implements SupabaseColumn {
+enum BookstoresColumn implements TetherColumn {
   address('address', 'address', 'bookstores', null),
   createdAt('created_at', 'created_at', 'bookstores', null),
   establishedDate('established_date', 'established_date', 'bookstores', null),
   id('id', 'id', 'bookstores', null),
   isOpen('is_open', 'is_open', 'bookstores', null),
   name('name', 'name', 'bookstores', null),
-  updatedAt('updated_at', 'updated_at', 'bookstores', null),
-;
+  updatedAt('updated_at', 'updated_at', 'bookstores', null);
+
   @override
   final String originalName;
   @override
@@ -24,7 +24,12 @@ enum BookstoresColumn implements SupabaseColumn {
   @override
   final String? relationshipPrefix;
 
-  const BookstoresColumn(this.originalName, this.localName, this.tableName, this.relationshipPrefix);
+  const BookstoresColumn(
+    this.originalName,
+    this.localName,
+    this.tableName,
+    this.relationshipPrefix,
+  );
 
   @override
   String get dbName => originalName;
@@ -36,16 +41,20 @@ enum BookstoresColumn implements SupabaseColumn {
   String get qualified => 'bookstores.$originalName';
 
   @override
-  String get fullyQualified => relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
+  String get fullyQualified =>
+      relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
 
   @override
-  SupabaseColumn related(String relationshipName) => RelatedColumnRef(originalName, localName, tableName, relationshipName);
+  TetherColumn related(String relationshipName) =>
+      RelatedColumnRef(originalName, localName, tableName, relationshipName);
 }
 
-
 class BookstoresSelectBuilder extends SupabaseSelectBuilderBase {
-
-  BookstoresSelectBuilder() : super(primaryTableKey: 'public.bookstores', currentTableInfo: globalSupabaseSchema['public.bookstores']!);
+  BookstoresSelectBuilder()
+    : super(
+        primaryTableKey: 'public.bookstores',
+        currentTableInfo: globalSupabaseSchema['public.bookstores']!,
+      );
 
   BookstoresSelectBuilder select([List<BookstoresColumn>? columns]) {
     if (columns == null || columns.isEmpty) {
@@ -57,23 +66,26 @@ class BookstoresSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  BookstoresSelectBuilder withBookstoreBooks(BookstoreBooksSelectBuilder? builder, {bool innerJoin = false}) {
+  BookstoresSelectBuilder withBookstoreBooks(
+    BookstoreBooksSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? BookstoreBooksSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'bookstore_books',
-        fkConstraintName: 'bookstore_books_bookstore_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'bookstore_books',
+      fkConstraintName: 'bookstore_books_bookstore_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
-
 }
 
-
-enum AuthorsColumn implements SupabaseColumn {
+enum AuthorsColumn implements TetherColumn {
   bio('bio', 'bio', 'authors', null),
   birthDate('birth_date', 'birth_date', 'authors', null),
   createdAt('created_at', 'created_at', 'authors', null),
@@ -82,8 +94,8 @@ enum AuthorsColumn implements SupabaseColumn {
   firstName('first_name', 'first_name', 'authors', null),
   id('id', 'id', 'authors', null),
   lastName('last_name', 'last_name', 'authors', null),
-  updatedAt('updated_at', 'updated_at', 'authors', null),
-;
+  updatedAt('updated_at', 'updated_at', 'authors', null);
+
   @override
   final String originalName;
   @override
@@ -93,7 +105,12 @@ enum AuthorsColumn implements SupabaseColumn {
   @override
   final String? relationshipPrefix;
 
-  const AuthorsColumn(this.originalName, this.localName, this.tableName, this.relationshipPrefix);
+  const AuthorsColumn(
+    this.originalName,
+    this.localName,
+    this.tableName,
+    this.relationshipPrefix,
+  );
 
   @override
   String get dbName => originalName;
@@ -105,16 +122,20 @@ enum AuthorsColumn implements SupabaseColumn {
   String get qualified => 'authors.$originalName';
 
   @override
-  String get fullyQualified => relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
+  String get fullyQualified =>
+      relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
 
   @override
-  SupabaseColumn related(String relationshipName) => RelatedColumnRef(originalName, localName, tableName, relationshipName);
+  TetherColumn related(String relationshipName) =>
+      RelatedColumnRef(originalName, localName, tableName, relationshipName);
 }
 
-
 class AuthorsSelectBuilder extends SupabaseSelectBuilderBase {
-
-  AuthorsSelectBuilder() : super(primaryTableKey: 'public.authors', currentTableInfo: globalSupabaseSchema['public.authors']!);
+  AuthorsSelectBuilder()
+    : super(
+        primaryTableKey: 'public.authors',
+        currentTableInfo: globalSupabaseSchema['public.authors']!,
+      );
 
   AuthorsSelectBuilder select([List<AuthorsColumn>? columns]) {
     if (columns == null || columns.isEmpty) {
@@ -126,29 +147,32 @@ class AuthorsSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  AuthorsSelectBuilder withBooks(BooksSelectBuilder? builder, {bool innerJoin = false}) {
+  AuthorsSelectBuilder withBooks(
+    BooksSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? BooksSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'books',
-        fkConstraintName: 'books_author_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'books',
+      fkConstraintName: 'books_author_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
-
 }
 
-
-enum GenresColumn implements SupabaseColumn {
+enum GenresColumn implements TetherColumn {
   createdAt('created_at', 'created_at', 'genres', null),
   description('description', 'description', 'genres', null),
   id('id', 'id', 'genres', null),
   name('name', 'name', 'genres', null),
-  updatedAt('updated_at', 'updated_at', 'genres', null),
-;
+  updatedAt('updated_at', 'updated_at', 'genres', null);
+
   @override
   final String originalName;
   @override
@@ -158,7 +182,12 @@ enum GenresColumn implements SupabaseColumn {
   @override
   final String? relationshipPrefix;
 
-  const GenresColumn(this.originalName, this.localName, this.tableName, this.relationshipPrefix);
+  const GenresColumn(
+    this.originalName,
+    this.localName,
+    this.tableName,
+    this.relationshipPrefix,
+  );
 
   @override
   String get dbName => originalName;
@@ -170,16 +199,20 @@ enum GenresColumn implements SupabaseColumn {
   String get qualified => 'genres.$originalName';
 
   @override
-  String get fullyQualified => relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
+  String get fullyQualified =>
+      relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
 
   @override
-  SupabaseColumn related(String relationshipName) => RelatedColumnRef(originalName, localName, tableName, relationshipName);
+  TetherColumn related(String relationshipName) =>
+      RelatedColumnRef(originalName, localName, tableName, relationshipName);
 }
 
-
 class GenresSelectBuilder extends SupabaseSelectBuilderBase {
-
-  GenresSelectBuilder() : super(primaryTableKey: 'public.genres', currentTableInfo: globalSupabaseSchema['public.genres']!);
+  GenresSelectBuilder()
+    : super(
+        primaryTableKey: 'public.genres',
+        currentTableInfo: globalSupabaseSchema['public.genres']!,
+      );
 
   GenresSelectBuilder select([List<GenresColumn>? columns]) {
     if (columns == null || columns.isEmpty) {
@@ -191,29 +224,32 @@ class GenresSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  GenresSelectBuilder withBookGenres(BookGenresSelectBuilder? builder, {bool innerJoin = false}) {
+  GenresSelectBuilder withBookGenres(
+    BookGenresSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? BookGenresSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'book_genres',
-        fkConstraintName: 'book_genres_genre_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'book_genres',
+      fkConstraintName: 'book_genres_genre_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
-
 }
 
-
-enum ImagesColumn implements SupabaseColumn {
+enum ImagesColumn implements TetherColumn {
   altText('alt_text', 'alt_text', 'images', null),
   createdAt('created_at', 'created_at', 'images', null),
   id('id', 'id', 'images', null),
   updatedAt('updated_at', 'updated_at', 'images', null),
-  url('url', 'url', 'images', null),
-;
+  url('url', 'url', 'images', null);
+
   @override
   final String originalName;
   @override
@@ -223,7 +259,12 @@ enum ImagesColumn implements SupabaseColumn {
   @override
   final String? relationshipPrefix;
 
-  const ImagesColumn(this.originalName, this.localName, this.tableName, this.relationshipPrefix);
+  const ImagesColumn(
+    this.originalName,
+    this.localName,
+    this.tableName,
+    this.relationshipPrefix,
+  );
 
   @override
   String get dbName => originalName;
@@ -235,16 +276,20 @@ enum ImagesColumn implements SupabaseColumn {
   String get qualified => 'images.$originalName';
 
   @override
-  String get fullyQualified => relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
+  String get fullyQualified =>
+      relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
 
   @override
-  SupabaseColumn related(String relationshipName) => RelatedColumnRef(originalName, localName, tableName, relationshipName);
+  TetherColumn related(String relationshipName) =>
+      RelatedColumnRef(originalName, localName, tableName, relationshipName);
 }
 
-
 class ImagesSelectBuilder extends SupabaseSelectBuilderBase {
-
-  ImagesSelectBuilder() : super(primaryTableKey: 'public.images', currentTableInfo: globalSupabaseSchema['public.images']!);
+  ImagesSelectBuilder()
+    : super(
+        primaryTableKey: 'public.images',
+        currentTableInfo: globalSupabaseSchema['public.images']!,
+      );
 
   ImagesSelectBuilder select([List<ImagesColumn>? columns]) {
     if (columns == null || columns.isEmpty) {
@@ -256,36 +301,44 @@ class ImagesSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  ImagesSelectBuilder withBannerImages(BooksSelectBuilder? builder, {bool innerJoin = false}) {
+  ImagesSelectBuilder withBannerImages(
+    BooksSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? BooksSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'banner_images',
-        fkConstraintName: 'books_banner_image_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'banner_images',
+      fkConstraintName: 'books_banner_image_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
 
-  ImagesSelectBuilder withCoverImages(BooksSelectBuilder? builder, {bool innerJoin = false}) {
+  ImagesSelectBuilder withCoverImages(
+    BooksSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? BooksSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'cover_images',
-        fkConstraintName: 'books_cover_image_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'cover_images',
+      fkConstraintName: 'books_cover_image_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
-
 }
 
-
-enum BooksColumn implements SupabaseColumn {
+enum BooksColumn implements TetherColumn {
   authorId('author_id', 'author_id', 'books', null),
   bannerImageId('banner_image_id', 'banner_image_id', 'books', null),
   coverImageId('cover_image_id', 'cover_image_id', 'books', null),
@@ -299,8 +352,8 @@ enum BooksColumn implements SupabaseColumn {
   stockCount('stock_count', 'stock_count', 'books', null),
   tags('tags', 'tags', 'books', null),
   title('title', 'title', 'books', null),
-  updatedAt('updated_at', 'updated_at', 'books', null),
-;
+  updatedAt('updated_at', 'updated_at', 'books', null);
+
   @override
   final String originalName;
   @override
@@ -310,7 +363,12 @@ enum BooksColumn implements SupabaseColumn {
   @override
   final String? relationshipPrefix;
 
-  const BooksColumn(this.originalName, this.localName, this.tableName, this.relationshipPrefix);
+  const BooksColumn(
+    this.originalName,
+    this.localName,
+    this.tableName,
+    this.relationshipPrefix,
+  );
 
   @override
   String get dbName => originalName;
@@ -322,16 +380,20 @@ enum BooksColumn implements SupabaseColumn {
   String get qualified => 'books.$originalName';
 
   @override
-  String get fullyQualified => relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
+  String get fullyQualified =>
+      relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
 
   @override
-  SupabaseColumn related(String relationshipName) => RelatedColumnRef(originalName, localName, tableName, relationshipName);
+  TetherColumn related(String relationshipName) =>
+      RelatedColumnRef(originalName, localName, tableName, relationshipName);
 }
 
-
 class BooksSelectBuilder extends SupabaseSelectBuilderBase {
-
-  BooksSelectBuilder() : super(primaryTableKey: 'public.books', currentTableInfo: globalSupabaseSchema['public.books']!);
+  BooksSelectBuilder()
+    : super(
+        primaryTableKey: 'public.books',
+        currentTableInfo: globalSupabaseSchema['public.books']!,
+      );
 
   BooksSelectBuilder select([List<BooksColumn>? columns]) {
     if (columns == null || columns.isEmpty) {
@@ -343,79 +405,102 @@ class BooksSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  BooksSelectBuilder withAuthor(AuthorsSelectBuilder? builder, {bool innerJoin = false}) {
+  BooksSelectBuilder withAuthor(
+    AuthorsSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? AuthorsSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'author',
-        fkConstraintName: 'books_author_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'author',
+      fkConstraintName: 'books_author_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
 
-  BooksSelectBuilder withBannerImage(ImagesSelectBuilder? builder, {bool innerJoin = false}) {
+  BooksSelectBuilder withBannerImage(
+    ImagesSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? ImagesSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'banner_image',
-        fkConstraintName: 'books_banner_image_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'banner_image',
+      fkConstraintName: 'books_banner_image_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
 
-  BooksSelectBuilder withCoverImage(ImagesSelectBuilder? builder, {bool innerJoin = false}) {
+  BooksSelectBuilder withCoverImage(
+    ImagesSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? ImagesSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'cover_image',
-        fkConstraintName: 'books_cover_image_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'cover_image',
+      fkConstraintName: 'books_cover_image_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
 
-  BooksSelectBuilder withBookGenres(BookGenresSelectBuilder? builder, {bool innerJoin = false}) {
+  BooksSelectBuilder withBookGenres(
+    BookGenresSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? BookGenresSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'book_genres',
-        fkConstraintName: 'book_genres_book_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'book_genres',
+      fkConstraintName: 'book_genres_book_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
 
-  BooksSelectBuilder withBookstoreBooks(BookstoreBooksSelectBuilder? builder, {bool innerJoin = false}) {
+  BooksSelectBuilder withBookstoreBooks(
+    BookstoreBooksSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? BookstoreBooksSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'bookstore_books',
-        fkConstraintName: 'bookstore_books_book_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'bookstore_books',
+      fkConstraintName: 'bookstore_books_book_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
-
 }
 
-
-enum BookGenresColumn implements SupabaseColumn {
+enum BookGenresColumn implements TetherColumn {
   bookId('book_id', 'book_id', 'book_genres', null),
   genreId('genre_id', 'genre_id', 'book_genres', null),
-  id('id', 'id', 'book_genres', null),
-;
+  id('id', 'id', 'book_genres', null);
+
   @override
   final String originalName;
   @override
@@ -425,7 +510,12 @@ enum BookGenresColumn implements SupabaseColumn {
   @override
   final String? relationshipPrefix;
 
-  const BookGenresColumn(this.originalName, this.localName, this.tableName, this.relationshipPrefix);
+  const BookGenresColumn(
+    this.originalName,
+    this.localName,
+    this.tableName,
+    this.relationshipPrefix,
+  );
 
   @override
   String get dbName => originalName;
@@ -437,16 +527,20 @@ enum BookGenresColumn implements SupabaseColumn {
   String get qualified => 'book_genres.$originalName';
 
   @override
-  String get fullyQualified => relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
+  String get fullyQualified =>
+      relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
 
   @override
-  SupabaseColumn related(String relationshipName) => RelatedColumnRef(originalName, localName, tableName, relationshipName);
+  TetherColumn related(String relationshipName) =>
+      RelatedColumnRef(originalName, localName, tableName, relationshipName);
 }
 
-
 class BookGenresSelectBuilder extends SupabaseSelectBuilderBase {
-
-  BookGenresSelectBuilder() : super(primaryTableKey: 'public.book_genres', currentTableInfo: globalSupabaseSchema['public.book_genres']!);
+  BookGenresSelectBuilder()
+    : super(
+        primaryTableKey: 'public.book_genres',
+        currentTableInfo: globalSupabaseSchema['public.book_genres']!,
+      );
 
   BookGenresSelectBuilder select([List<BookGenresColumn>? columns]) {
     if (columns == null || columns.isEmpty) {
@@ -458,40 +552,48 @@ class BookGenresSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  BookGenresSelectBuilder withBook(BooksSelectBuilder? builder, {bool innerJoin = false}) {
+  BookGenresSelectBuilder withBook(
+    BooksSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? BooksSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'book',
-        fkConstraintName: 'book_genres_book_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'book',
+      fkConstraintName: 'book_genres_book_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
 
-  BookGenresSelectBuilder withGenre(GenresSelectBuilder? builder, {bool innerJoin = false}) {
+  BookGenresSelectBuilder withGenre(
+    GenresSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? GenresSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'genre',
-        fkConstraintName: 'book_genres_genre_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'genre',
+      fkConstraintName: 'book_genres_genre_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
-
 }
 
-
-enum BookstoreBooksColumn implements SupabaseColumn {
+enum BookstoreBooksColumn implements TetherColumn {
   bookId('book_id', 'book_id', 'bookstore_books', null),
   bookstoreId('bookstore_id', 'bookstore_id', 'bookstore_books', null),
-  id('id', 'id', 'bookstore_books', null),
-;
+  id('id', 'id', 'bookstore_books', null);
+
   @override
   final String originalName;
   @override
@@ -501,7 +603,12 @@ enum BookstoreBooksColumn implements SupabaseColumn {
   @override
   final String? relationshipPrefix;
 
-  const BookstoreBooksColumn(this.originalName, this.localName, this.tableName, this.relationshipPrefix);
+  const BookstoreBooksColumn(
+    this.originalName,
+    this.localName,
+    this.tableName,
+    this.relationshipPrefix,
+  );
 
   @override
   String get dbName => originalName;
@@ -513,16 +620,20 @@ enum BookstoreBooksColumn implements SupabaseColumn {
   String get qualified => 'bookstore_books.$originalName';
 
   @override
-  String get fullyQualified => relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
+  String get fullyQualified =>
+      relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
 
   @override
-  SupabaseColumn related(String relationshipName) => RelatedColumnRef(originalName, localName, tableName, relationshipName);
+  TetherColumn related(String relationshipName) =>
+      RelatedColumnRef(originalName, localName, tableName, relationshipName);
 }
 
-
 class BookstoreBooksSelectBuilder extends SupabaseSelectBuilderBase {
-
-  BookstoreBooksSelectBuilder() : super(primaryTableKey: 'public.bookstore_books', currentTableInfo: globalSupabaseSchema['public.bookstore_books']!);
+  BookstoreBooksSelectBuilder()
+    : super(
+        primaryTableKey: 'public.bookstore_books',
+        currentTableInfo: globalSupabaseSchema['public.bookstore_books']!,
+      );
 
   BookstoreBooksSelectBuilder select([List<BookstoreBooksColumn>? columns]) {
     if (columns == null || columns.isEmpty) {
@@ -534,44 +645,52 @@ class BookstoreBooksSelectBuilder extends SupabaseSelectBuilderBase {
     return this;
   }
 
-  BookstoreBooksSelectBuilder withBook(BooksSelectBuilder? builder, {bool innerJoin = false}) {
+  BookstoreBooksSelectBuilder withBook(
+    BooksSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? BooksSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'book',
-        fkConstraintName: 'bookstore_books_book_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'book',
+      fkConstraintName: 'bookstore_books_book_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
 
-  BookstoreBooksSelectBuilder withBookstore(BookstoresSelectBuilder? builder, {bool innerJoin = false}) {
+  BookstoreBooksSelectBuilder withBookstore(
+    BookstoresSelectBuilder? builder, {
+    bool innerJoin = false,
+  }) {
     final finalBuilder = builder ?? BookstoresSelectBuilder();
     if (builder == null) {
-      finalBuilder.selectAll(); // Default to selecting all columns for the nested builder
+      finalBuilder
+          .selectAll(); // Default to selecting all columns for the nested builder
     }
     addSupabaseRelated(
-        jsonKey: 'bookstore',
-        fkConstraintName: 'bookstore_books_bookstore_id_fkey',
-        nestedBuilder: finalBuilder,
-        innerJoin: innerJoin);
+      jsonKey: 'bookstore',
+      fkConstraintName: 'bookstore_books_bookstore_id_fkey',
+      nestedBuilder: finalBuilder,
+      innerJoin: innerJoin,
+    );
     return this;
   }
-
 }
 
-
-enum ProfilesColumn implements SupabaseColumn {
+enum ProfilesColumn implements TetherColumn {
   avatarUrl('avatar_url', 'avatar_url', 'profiles', null),
   createdAt('created_at', 'created_at', 'profiles', null),
   fullName('full_name', 'full_name', 'profiles', null),
   id('id', 'id', 'profiles', null),
   updatedAt('updated_at', 'updated_at', 'profiles', null),
   username('username', 'username', 'profiles', null),
-  website('website', 'website', 'profiles', null),
-;
+  website('website', 'website', 'profiles', null);
+
   @override
   final String originalName;
   @override
@@ -581,7 +700,12 @@ enum ProfilesColumn implements SupabaseColumn {
   @override
   final String? relationshipPrefix;
 
-  const ProfilesColumn(this.originalName, this.localName, this.tableName, this.relationshipPrefix);
+  const ProfilesColumn(
+    this.originalName,
+    this.localName,
+    this.tableName,
+    this.relationshipPrefix,
+  );
 
   @override
   String get dbName => originalName;
@@ -593,16 +717,20 @@ enum ProfilesColumn implements SupabaseColumn {
   String get qualified => 'profiles.$originalName';
 
   @override
-  String get fullyQualified => relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
+  String get fullyQualified =>
+      relationshipPrefix != null ? '$relationshipPrefix.$dbName' : dbName;
 
   @override
-  SupabaseColumn related(String relationshipName) => RelatedColumnRef(originalName, localName, tableName, relationshipName);
+  TetherColumn related(String relationshipName) =>
+      RelatedColumnRef(originalName, localName, tableName, relationshipName);
 }
 
-
 class ProfilesSelectBuilder extends SupabaseSelectBuilderBase {
-
-  ProfilesSelectBuilder() : super(primaryTableKey: 'public.profiles', currentTableInfo: globalSupabaseSchema['public.profiles']!);
+  ProfilesSelectBuilder()
+    : super(
+        primaryTableKey: 'public.profiles',
+        currentTableInfo: globalSupabaseSchema['public.profiles']!,
+      );
 
   ProfilesSelectBuilder select([List<ProfilesColumn>? columns]) {
     if (columns == null || columns.isEmpty) {
@@ -613,7 +741,4 @@ class ProfilesSelectBuilder extends SupabaseSelectBuilderBase {
     }
     return this;
   }
-
 }
-
-
