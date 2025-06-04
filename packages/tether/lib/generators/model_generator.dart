@@ -4,7 +4,7 @@ import 'package:collection/collection.dart'; // For whereNotNull
 import 'package:inflection3/inflection3.dart';
 import 'package:path/path.dart' as p;
 import 'package:recase/recase.dart';
-import 'package:tether/config/config_model.dart';
+import 'package:flutter_tether/config/config_model.dart';
 import 'package:tether_libs/models/table_info.dart';
 import 'package:tether_libs/utils/logger.dart';
 

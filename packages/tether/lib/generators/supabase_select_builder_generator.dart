@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:inflection3/inflection3.dart';
 import 'package:path/path.dart' as p; // For path joining
 import 'package:recase/recase.dart';
-import 'package:tether/config/config_model.dart';
+import 'package:flutter_tether/config/config_model.dart';
 
 // Import config and schema classes
 import 'package:tether_libs/models/table_info.dart';

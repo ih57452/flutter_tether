@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
-import 'package:tether/config/config_model.dart';
-import 'package:tether/utils/schema_version_manager.dart'; // Keep for version tracking
+import 'package:flutter_tether/config/config_model.dart';
+import 'package:flutter_tether/utils/schema_version_manager.dart'; // Keep for version tracking
 import 'package:tether_libs/models/table_info.dart';
 import 'package:tether_libs/utils/logger.dart';
 

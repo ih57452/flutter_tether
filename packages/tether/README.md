@@ -109,7 +109,7 @@ TETHER_SSL=true
 ### 3. Generate Code
 
 ```bash
-dart run tether --config tether.yaml
+dart run flutter_tether --config tether.yaml
 ```
 
 ### 4. Basic Usage

@@ -158,7 +158,7 @@ TETHER_SSL=true
 Run the generator to create the necessary files:
 
 ```bash
-dart run tether --config tether.yaml
+dart run flutter_tether --config tether.yaml
 ```
 
 This will generate the necessary files in the `lib/database` directory by

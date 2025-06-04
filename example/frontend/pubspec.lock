@@ -259,6 +259,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_tether:
+    dependency: "direct dev"
+    description:
+      path: "../../packages/tether"
+      relative: true
+    source: path
+    version: "1.0.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -861,13 +868,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.8"
-  tether:
-    dependency: "direct dev"
-    description:
-      path: "../../packages/tether"
-      relative: true
-    source: path
-    version: "1.0.0"
   tether_libs:
     dependency: "direct main"
     description:

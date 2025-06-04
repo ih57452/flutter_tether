@@ -1,8 +1,8 @@
 // bin/supabase_gen.dart
 import 'dart:io';
 import 'package:args/args.dart';
-import 'package:tether/config/config_loader.dart';
-import 'package:tether/generator.dart';
+import 'package:flutter_tether/config/config_loader.dart';
+import 'package:flutter_tether/generator.dart';
 import 'package:tether_libs/utils/logger.dart';
 
 Future<void> main(List<String> arguments) async {

@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
-import 'package:tether/config/config_model.dart';
+import 'package:flutter_tether/config/config_model.dart';
 import 'package:tether_libs/utils/logger.dart'; // Assuming Logger exists
 
 class CoreMigrationGenerator {

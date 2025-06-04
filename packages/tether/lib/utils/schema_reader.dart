@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart'; // Added import
 import 'package:postgres/postgres.dart';
-import 'package:tether/config/config_model.dart';
+import 'package:flutter_tether/config/config_model.dart';
 import 'package:tether_libs/models/table_info.dart';
 import 'package:tether_libs/utils/logger.dart';
 import 'package:tether_libs/utils/string_utils.dart';

@@ -1,10 +1,10 @@
 // lib/src/generator.dart
 import 'dart:io';
-import 'package:tether/generators/auth_manager_generator.dart';
-import 'package:tether/generators/background_service_manager_generator.dart';
-import 'package:tether/utils/schema_reader.dart';
-import 'package:tether/utils/schema_version_manager.dart';
-import 'package:tether/utils/schema_writer.dart';
+import 'package:flutter_tether/generators/auth_manager_generator.dart';
+import 'package:flutter_tether/generators/background_service_manager_generator.dart';
+import 'package:flutter_tether/utils/schema_reader.dart';
+import 'package:flutter_tether/utils/schema_version_manager.dart';
+import 'package:flutter_tether/utils/schema_writer.dart';
 import 'package:tether_libs/utils/logger.dart';
 
 import 'generators/client_manager_generator.dart';

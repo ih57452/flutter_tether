@@ -50,7 +50,8 @@ the specified profile table.
 
 ### 2. Generated Files
 
-When you run `dart run tether --config tether.yaml`, Tether will generate:
+When you run `dart run flutter_tether --config tether.yaml`, Tether will
+generate:
 
 - **`lib/database/managers/auth_manager.g.dart`**: The core
   `AuthManager<TProfileModel>` class
