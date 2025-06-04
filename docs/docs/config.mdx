@@ -94,15 +94,15 @@ generation:
 
 #### Global Options
 
-| Option                    | Type         | Default         | Description                                                         |
-| ------------------------- | ------------ | --------------- | ------------------------------------------------------------------- |
-| `output_directory`        | String       | `lib/database`  | Root directory for generated files                                  |
-| `generate_for_all_tables` | Boolean      | `true`          | Whether to generate code for all discovered tables                  |
-| `exclude_tables`          | List<String> | `[]`            | Table patterns to exclude (supports regex)                          |
-| `include_tables`          | List<String> | `[]`            | Only generate for these tables (overrides exclude)                  |
-| `exclude_references`      | List<String> | `[]`            | Foreign key relationships to ignore                                 |
-| `databaseName`            | String       | `app_db.sqlite` | Name of the local SQLite database file                              |
-| `sanitization_endings`    | List<String> | `[]`            | Suffixes to remove from field names when generating Dart properties |
+| Option                    | Type               | Default         | Description                                                         |
+| ------------------------- | ------------------ | --------------- | ------------------------------------------------------------------- |
+| `output_directory`        | String             | `lib/database`  | Root directory for generated files                                  |
+| `generate_for_all_tables` | Boolean            | `true`          | Whether to generate code for all discovered tables                  |
+| `exclude_tables`          | List&lt;String&gt; | `[]`            | Table patterns to exclude (supports regex)                          |
+| `include_tables`          | List&lt;String&gt; | `[]`            | Only generate for these tables (overrides exclude)                  |
+| `exclude_references`      | List&lt;String&gt; | `[]`            | Foreign key relationships to ignore                                 |
+| `databaseName`            | String             | `app_db.sqlite` | Name of the local SQLite database file                              |
+| `sanitization_endings`    | List&lt;String&gt; | `[]`            | Suffixes to remove from field names when generating Dart properties |
 
 ### Models Configuration
 
