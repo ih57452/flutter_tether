@@ -15,7 +15,7 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: "https://cspecter.github.io",
+  url: "https://flutterTether.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: "/flutter_tether/",
@@ -24,6 +24,8 @@ const config: Config = {
   // If you aren't using GitHub pages, you don't need these.
   organizationName: "cspecter", // Usually your GitHub org/user name.
   projectName: "flutter_tether", // Usually your repo name.
+  deploymentBranch: "gh-pages", // The branch that GitHub pages will deploy from.
+  trailingSlash: false, // Whether to add a trailing slash to URLs
 
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
