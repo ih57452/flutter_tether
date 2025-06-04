@@ -99,7 +99,6 @@ generation:
   exclude_references: []
   generate_for_all_tables: true
 
-  dbClassName: AppDb
   databaseName: 'app_db.sqlite'
 
   models:
@@ -108,9 +107,6 @@ generation:
     prefix: ''
     suffix: Model
     use_null_safety: true
-
-  supabase_selectors:
-    enabled: true 
 
   supabase_select_builders:
     enabled: true 

@@ -16,7 +16,6 @@ class SupabaseGenConfig {
   final bool generateForAllTables;
 
   // --- Database Settings ---
-  final String dbClassName;
   final String databaseName;
   final bool generateSupabaseSelectBuilders;
   final String supabaseSelectBuildersFilePath;
@@ -77,7 +76,6 @@ class SupabaseGenConfig {
     this.repositorySuffix = 'Repository',
 
     // Database Settings
-    this.dbClassName = 'AppDb',
     this.databaseName = 'app_db.sqlite',
     this.generateSupabaseSelectBuilders = false,
     this.supabaseSelectBuildersFilePath =

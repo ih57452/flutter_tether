@@ -1,0 +1,456 @@
+---
+sidebar_position: 7
+---
+
+# Configuration Reference
+
+This page provides a complete reference for all configuration options available
+in your `tether.yaml` file. The configuration file controls how Tether analyzes
+your Supabase schema and generates Flutter code.
+
+## Basic Structure
+
+```yaml
+database:
+  # Database connection settings
+  
+generation:
+  # Code generation settings
+```
+
+## Database Configuration
+
+The `database` section configures how Tether connects to your Supabase database
+for schema introspection.
+
+```yaml
+database:
+  host: TETHER_SUPABASE_HOST        # Environment variable reference
+  port: TETHER_PORT_NAME            # Database port (usually 5432)
+  database: TETHER_DB_NAME          # Database name (usually 'postgres')
+  username: TETHER_DB_USERNAME      # Database username
+  password: TETHER_DB_PASSWORD      # Database password
+  ssl: TETHER_SSL                   # Use SSL connection (true/false)
+```
+
+### Database Options
+
+| Option     | Type    | Default  | Description                   |
+| ---------- | ------- | -------- | ----------------------------- |
+| `host`     | String  | Required | Supabase database host URL    |
+| `port`     | Integer | 5432     | Database port number          |
+| `database` | String  | postgres | Database name                 |
+| `username` | String  | Required | Database username             |
+| `password` | String  | Required | Database password             |
+| `ssl`      | Boolean | true     | Whether to use SSL connection |
+
+**Environment Variable Usage:** Configuration values starting with uppercase
+letters (like `TETHER_SUPABASE_HOST`) are treated as environment variable
+references. Create a `.env` file with these values:
+
+```env
+TETHER_SUPABASE_HOST=your_supabase_host
+TETHER_PORT_NAME=5432
+TETHER_DB_NAME=postgres
+TETHER_DB_USERNAME=postgres
+TETHER_DB_PASSWORD=your_password
+TETHER_SSL=true
+```
+
+## Generation Configuration
+
+The `generation` section controls all aspects of code generation.
+
+### Global Generation Settings
+
+```yaml
+generation:
+  output_directory: lib/database           # Where to generate files
+  generate_for_all_tables: true           # Generate for all tables
+  
+  # Table filtering
+  exclude_tables:                          # Tables to skip
+    - '_realtime.*'
+    - 'auth.*'
+    - 'net.*'
+    - 'pgsodium.*'
+    - 'realtime.*'
+    - 'storage.*'
+    - 'supabase_functions.*'
+    - 'vault.*'
+  
+  include_tables: []                       # Only generate for these tables
+  exclude_references: []                   # Skip these foreign key relationships
+  
+  # Database settings
+  databaseName: 'app_db.sqlite'           # Local SQLite database name
+  
+  # Naming conventions
+  sanitization_endings:                    # Remove these suffixes from field names
+    - _id
+    - _fk
+    - _uuid
+```
+
+#### Global Options
+
+| Option                    | Type         | Default         | Description                                                         |
+| ------------------------- | ------------ | --------------- | ------------------------------------------------------------------- |
+| `output_directory`        | String       | `lib/database`  | Root directory for generated files                                  |
+| `generate_for_all_tables` | Boolean      | `true`          | Whether to generate code for all discovered tables                  |
+| `exclude_tables`          | List<String> | `[]`            | Table patterns to exclude (supports regex)                          |
+| `include_tables`          | List<String> | `[]`            | Only generate for these tables (overrides exclude)                  |
+| `exclude_references`      | List<String> | `[]`            | Foreign key relationships to ignore                                 |
+| `databaseName`            | String       | `app_db.sqlite` | Name of the local SQLite database file                              |
+| `sanitization_endings`    | List<String> | `[]`            | Suffixes to remove from field names when generating Dart properties |
+
+### Models Configuration
+
+Controls generation of Dart model classes from your database tables.
+
+```yaml
+generation:
+  models:
+    enabled: true                          # Enable model generation
+    filename: models.g.dart               # Output filename
+    prefix: ''                            # Prefix for model class names
+    suffix: Model                         # Suffix for model class names
+    use_null_safety: true                 # Use Dart null safety
+```
+
+#### Model Options
+
+| Option            | Type    | Default         | Description                              |
+| ----------------- | ------- | --------------- | ---------------------------------------- |
+| `enabled`         | Boolean | `true`          | Whether to generate model classes        |
+| `filename`        | String  | `models.g.dart` | Name of the generated models file        |
+| `prefix`          | String  | `''`            | Prefix added to all model class names    |
+| `suffix`          | String  | `Model`         | Suffix added to all model class names    |
+| `use_null_safety` | Boolean | `true`          | Whether generated models use null safety |
+
+**Example:** With `suffix: Model`, a `books` table becomes `BookModel` class.
+
+### Client Managers Configuration
+
+Controls generation of high-level data access managers.
+
+```yaml
+generation:
+  client_managers:
+    enabled: true                          # Enable manager generation
+    use_riverpod: true                     # Generate Riverpod providers
+    suffix: Manager                        # Suffix for manager class names
+```
+
+#### Client Manager Options
+
+| Option         | Type    | Default   | Description                            |
+| -------------- | ------- | --------- | -------------------------------------- |
+| `enabled`      | Boolean | `true`    | Whether to generate client managers    |
+| `use_riverpod` | Boolean | `false`   | Whether to generate Riverpod providers |
+| `suffix`       | String  | `Manager` | Suffix added to manager class names    |
+
+### Supabase Select Builders Configuration
+
+Controls generation of type-safe query builders.
+
+```yaml
+generation:
+  supabase_select_builders:
+    enabled: true                          # Enable select builder generation
+    filename: 'supabase_select_builders.g.dart'  # Output filename
+    generated_schema_dart_file_name: 'supabase_schema.g.dart'  # Schema file
+    suffix: SelectBuilder                  # Suffix for builder class names
+```
+
+#### Select Builder Options
+
+| Option                            | Type    | Default                           | Description                         |
+| --------------------------------- | ------- | --------------------------------- | ----------------------------------- |
+| `enabled`                         | Boolean | `true`                            | Whether to generate select builders |
+| `filename`                        | String  | `supabase_select_builders.g.dart` | Name of builders file               |
+| `generated_schema_dart_file_name` | String  | `supabase_schema.g.dart`          | Name of schema definitions file     |
+| `suffix`                          | String  | `SelectBuilder`                   | Suffix for builder class names      |
+
+### SQLite Migrations Configuration
+
+Controls generation of SQLite migration files.
+
+```yaml
+generation:
+  sqlite_migrations:
+    enabled: true                          # Enable migration generation
+    output_subdir: 'sqlite_migrations'     # Subdirectory for migration files
+```
+
+#### Migration Options
+
+| Option          | Type    | Default             | Description                                         |
+| --------------- | ------- | ------------------- | --------------------------------------------------- |
+| `enabled`       | Boolean | `true`              | Whether to generate SQLite migrations               |
+| `output_subdir` | String  | `sqlite_migrations` | Subdirectory within output_directory for migrations |
+
+### Providers Configuration
+
+Controls generation of Riverpod providers.
+
+```yaml
+generation:
+  providers:
+    enabled: true                          # Enable provider generation
+    output_subdir: 'providers'             # Subdirectory for provider files
+```
+
+#### Provider Options
+
+| Option          | Type    | Default     | Description                            |
+| --------------- | ------- | ----------- | -------------------------------------- |
+| `enabled`       | Boolean | `false`     | Whether to generate Riverpod providers |
+| `output_subdir` | String  | `providers` | Subdirectory for provider files        |
+
+### Authentication Configuration
+
+Controls generation of authentication management code.
+
+```yaml
+generation:
+  authentication:
+    enabled: true                          # Enable auth manager generation
+    profile_table: 'profiles'              # Table containing user profiles
+```
+
+#### Authentication Options
+
+| Option          | Type    | Default    | Description                                 |
+| --------------- | ------- | ---------- | ------------------------------------------- |
+| `enabled`       | Boolean | `false`    | Whether to generate authentication manager  |
+| `profile_table` | String  | `profiles` | Name of the table storing user profile data |
+
+**Requirements:**
+
+- The profile table must have an `id` column that references `auth.users(id)`
+- Enable Row Level Security (RLS) on the profile table
+- Set up appropriate RLS policies for user access
+
+### Background Services Configuration
+
+Controls generation of background job processing system.
+
+```yaml
+generation:
+  background_services:
+    enabled: true                          # Enable background service generation
+```
+
+#### Background Service Options
+
+| Option    | Type    | Default | Description                               |
+| --------- | ------- | ------- | ----------------------------------------- |
+| `enabled` | Boolean | `false` | Whether to generate background job system |
+
+**Additional Requirements:** Add `flutter_background_service` to your
+`pubspec.yaml` when enabled.
+
+### User Preferences Configuration
+
+Controls generation of user preferences management system.
+
+```yaml
+generation:
+  user_preferences:
+    enabled: true                          # Enable preferences manager generation
+```
+
+#### User Preferences Options
+
+| Option    | Type    | Default | Description                                  |
+| --------- | ------- | ------- | -------------------------------------------- |
+| `enabled` | Boolean | `false` | Whether to generate user preferences manager |
+
+### Schema Registry Configuration
+
+Controls generation of schema metadata files.
+
+```yaml
+generation:
+  schema_registry_file_name: 'schema_registry.g.dart'  # Schema registry filename
+```
+
+#### Schema Registry Options
+
+| Option                      | Type   | Default                  | Description                      |
+| --------------------------- | ------ | ------------------------ | -------------------------------- |
+| `schema_registry_file_name` | String | `schema_registry.g.dart` | Name of the schema registry file |
+
+## Complete Example
+
+Here's a complete `tether.yaml` configuration with all options:
+
+```yaml
+database:
+  host: TETHER_SUPABASE_HOST 
+  port: TETHER_PORT_NAME 
+  database: TETHER_DB_NAME 
+  username: TETHER_DB_USERNAME 
+  password: TETHER_DB_PASSWORD 
+  ssl: TETHER_SSL 
+
+generation:
+  # Global settings
+  output_directory: lib/database
+  exclude_tables:
+    - '_realtime.*'
+    - 'auth.*'
+    - 'net.*'
+    - 'pgsodium.*'
+    - 'realtime.*'
+    - 'storage.*'
+    - 'supabase_functions.*'
+    - 'vault.*'
+  include_tables: []
+  exclude_references: []
+  generate_for_all_tables: true
+  databaseName: 'app_db.sqlite'
+
+  # Models
+  models:
+    enabled: true 
+    filename: models.g.dart
+    prefix: ''
+    suffix: Model
+    use_null_safety: true
+
+  # Query builders
+  supabase_select_builders:
+    enabled: true 
+    filename: 'supabase_select_builders.g.dart'
+    generated_schema_dart_file_name: 'supabase_schema.g.dart'
+    suffix: SelectBuilder
+
+  # Schema registry
+  schema_registry_file_name: 'schema_registry.g.dart'
+
+  # Migrations
+  sqlite_migrations:
+    enabled: true 
+    output_subdir: 'sqlite_migrations'
+
+  # Managers
+  client_managers:
+    enabled: true 
+    use_riverpod: true
+
+  # Providers
+  providers:
+    enabled: true 
+    output_subdir: 'providers'
+
+  # Features
+  authentication:
+    enabled: true
+    profile_table: 'profiles' 
+
+  background_services:
+    enabled: true
+
+  user_preferences:
+    enabled: true
+
+  # Naming
+  sanitization_endings:
+    - _id
+    - _fk
+    - _uuid
+```
+
+## Best Practices
+
+### Table Filtering
+
+Use `exclude_tables` for system tables you don't need:
+
+```yaml
+exclude_tables:
+  - '_realtime.*'      # Supabase internal tables
+  - 'auth.*'           # Authentication system tables
+  - 'storage.*'        # Storage system tables
+  - 'temp_*'           # Temporary tables
+```
+
+Use `include_tables` when you only want specific tables:
+
+```yaml
+include_tables:
+  - 'public.users'
+  - 'public.posts'
+  - 'public.comments'
+```
+
+### Naming Conventions
+
+Use `sanitization_endings` to clean up field names:
+
+```yaml
+sanitization_endings:
+  - _id      # user_id becomes user
+  - _fk      # author_fk becomes author
+  - _uuid    # session_uuid becomes session
+```
+
+This creates cleaner Dart property names while maintaining database
+relationships.
+
+### Environment Variables
+
+Always use environment variables for sensitive data:
+
+```yaml
+# ✅ Good - uses environment variables
+database:
+  host: TETHER_SUPABASE_HOST
+  password: TETHER_DB_PASSWORD
+
+# ❌ Bad - hardcoded values
+database:
+  host: "abc123.supabase.co"
+  password: "my-secret-password"
+```
+
+### Feature Flags
+
+Enable only the features you need:
+
+```yaml
+# Minimal setup
+generation:
+  models:
+    enabled: true
+  client_managers:
+    enabled: true
+
+# Full-featured setup
+generation:
+  models:
+    enabled: true
+  client_managers:
+    enabled: true
+    use_riverpod: true
+  authentication:
+    enabled: true
+  background_services:
+    enabled: true
+  user_preferences:
+    enabled: true
+```
+
+## Validation
+
+Tether validates your configuration and will show helpful error messages for:
+
+- Missing required database connection parameters
+- Invalid table name patterns
+- Conflicting include/exclude table settings
+- Missing dependencies for enabled features
+
+Run `dart run tether --config tether.yaml` to validate your configuration and
+generate code.

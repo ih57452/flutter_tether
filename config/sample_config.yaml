@@ -1,12 +1,12 @@
 # --- Database Connection Details ---
 # Specifies how to connect to your Supabase (<PostgreSQL>) database to read its schema.
 database:
-  host: TETHER_SUPABASE_HOST # The hostname or IP address of your Supabase database.
-  port: TETHER_PORT_NAME # The port number for your Supabase database. Default Supabase is 5432, but local dev might use 54321 via Docker.
-  database: TETHER_DB_NAME # The name of the database to connect to (usually 'postgres' for Supabase).
-  username: TETHER_DB_USERNAME # The username for connecting to the database (usually 'postgres' for Supabase).
-  password: TETHER_DB_PASSWORD # The password for the specified username. For local development, this might be a default. For production, use environment variables or a secure secrets manager.
-  ssl: TETHER_SSL # Whether to use SSL for the database connection. Supabase cloud instances require SSL. Set to true for cloud, false for local unsecured instances.
+  host: TETHER_SUPABASE_HOST # ENV key for the Supabase host URL or IP address.
+  port: TETHER_PORT_NAME # ENV key for the port number for your Supabase database. Default Supabase is 5432, but local dev might use 54321 via Docker.
+  database: TETHER_DB_NAME # ENV key for the name of the database to connect to (usually 'postgres' for Supabase).
+  username: TETHER_DB_USERNAME # ENV key for the username for connecting to the database (usually 'postgres' for Supabase).
+  password: TETHER_DB_PASSWORD # ENV key for the password for the specified username. For local development, this might be a default. For production, use environment variables or a secure secrets manager.
+  ssl: TETHER_SSL # ENV key for whether to use SSL for the database connection. Supabase cloud instances require SSL. Set to true for cloud, false for local unsecured instances.
 
 # --- General Code Generation Settings ---
 generation:
@@ -43,8 +43,6 @@ generation:
   generate_for_all_tables: true
 
   # --- Database Class Settings (for generated SQLite helpers or database access classes) ---
-  # The desired class name for your main generated database access class (e.g., if generating an Sqflite/Drift helper).
-  dbClassName: AppDb
   # The filename for the local SQLite database if you are generating code that uses one.
   databaseName: 'app_db.sqlite'
  
@@ -67,12 +65,8 @@ generation:
     use_null_safety: true
 
   # --- Supabase Select List Generation Settings ---
-  # This section appears to be for a generator that creates simple lists of column names for selects,
-  # which might be different from the more complex "Select Builders".
-  # If this is not used by your current `SupabaseGenConfig` for builders, it might be for a legacy or separate generator.
   supabase_selectors:
-    enabled: true # If true, enables the generation of these selector lists.
-    # filename: supabase_selectors.dart # Example filename if this generator produces a distinct file.
+    enabled: true # If true, enables the generation of these Select Builders.
 
   # --- Supabase Select BUILDER Generation Settings ---
   # Configuration for generating fluent "Select Builder" classes, which help construct

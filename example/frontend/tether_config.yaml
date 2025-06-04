@@ -40,11 +40,6 @@ generation:
     suffix: Model
     use_null_safety: true
 
-  # --- Supabase Select List Generation Settings ---
-  supabase_selectors:
-    enabled: true
-    # filename: supabase_selectors.dart
-
   # --- Supabase Select BUILDER Generation Settings ---
   supabase_select_builders:
     enabled: true
