@@ -178,3 +178,59 @@ to access.
 ```dart
 final db = ref.watch(databaseProvider);
 ```
+
+### Models
+
+Type-safe Dart classes automatically generated from your database schema:
+
+```dart
+// Generated from your 'books' table
+final book = BookModel(
+  id: '123',
+  title: 'Flutter Development Guide',
+  authorId: 'author-456',
+  published: true,
+  createdAt: DateTime.now(),
+);
+
+// Convert to/from JSON and SQLite
+final json = book.toJson();
+final fromJson = BookModel.fromJson(json);
+```
+
+### Select Builders
+
+Select builders allow you to construct complex queries in a type-safe manner:
+
+```dart
+final imageSelect = ImagesSelectBuilder().select();
+
+final genreSelect = GenresSelectBuilder().select();
+
+final authorSelect = AuthorsSelectBuilder().select();
+
+final bookGenreSelect = BookGenresSelectBuilder().select().withGenre(
+  genreSelect,
+);
+
+final bookSelect = BooksSelectBuilder()
+    .select()
+    .withAuthor(authorSelect)
+    .withBookGenres(bookGenreSelect.withGenre(genreSelect))
+    .withCoverImage(imageSelect)
+    .withBannerImage(imageSelect);
+```
+
+### Managers
+
+Managers provide a layer for CRUD operations with caching and synchronization:
+
+```dart
+final bookManager = ref.watch(bookManagerProvider);
+
+final books = await bookManager.query()
+  .select(bookSelect)
+  .eq(BookColumns.published, true)
+  .order(BookColumns.createdAt, ascending: false)
+  .limit(10);
+```

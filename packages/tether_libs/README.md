@@ -1,39 +1,32 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Tether Libs
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+**Tether Libs** is the runtime library package for Flutter Tether, providing the
+core functionality needed to build robust Flutter applications with Supabase
+integration, local SQLite caching, and powerful data management capabilities.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+[![Pub Version](https://img.shields.io/pub/v/tether_libs)](https://pub.dev/packages/tether_libs)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+## 🎯 Purpose
 
-## Features
+This package contains the runtime components that power applications built with
+the Tether code generator. It provides:
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- **Client Managers** - High-level interfaces for data operations with automatic
+  local caching
+- **Real-time Synchronization** - Seamless Supabase real-time subscription
+  management
+- **Authentication Management** - Complete auth flow with profile handling
+- **Background Services** - Persistent job queue for background processing
+- **Utilities** - Helper classes for common operations
 
-## Getting started
+## 📦 Installation
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+  tether_libs: ^1.0.0
+  # Required peer dependencies
+  supabase_flutter: ^2.9.0
+  sqlite_async: ^0.11.5
+  flutter_background_service: ^5.1.0  # Optional: for background services
 ```
-
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
