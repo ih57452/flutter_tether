@@ -1,4 +1,6 @@
 // lib/src/schema/schema_reader.dart
+import 'dart:io';
+
 import 'package:collection/collection.dart'; // Added import
 import 'package:postgres/postgres.dart';
 import 'package:tether/config/config_model.dart';
@@ -229,7 +231,7 @@ class SchemaReader {
 
       _logger.info('Reading schema details for table: $schema.$originalDbName');
 
-      late final List<SupabaseColumnInfo> columns;
+      late final List<TetherColumnInfo> columns;
       late final List<SupabaseForeignKeyConstraint> foreignKeys;
       late final List<SupabaseIndexInfo> indexes;
 
@@ -240,7 +242,7 @@ class SchemaReader {
           _readTableForeignKeys(schema, originalDbName),
           _readTableIndexes(schema, originalDbName),
         ]);
-        columns = results[0] as List<SupabaseColumnInfo>;
+        columns = results[0] as List<TetherColumnInfo>;
         foreignKeys = results[1] as List<SupabaseForeignKeyConstraint>;
         indexes = results[2] as List<SupabaseIndexInfo>;
       } catch (e, s) {
@@ -412,7 +414,7 @@ class SchemaReader {
   ///
   /// @param schema The schema name of the table.
   /// @param tableName The name of the table.
-  /// @return A [Future] containing a list of [SupabaseColumnInfo] objects for the table,
+  /// @return A [Future] containing a list of [TetherColumnInfo] objects for the table,
   ///         representing individual column properties. Foreign key relationships
   ///         are *not* populated in these objects.
   ///         Example return structure:
@@ -442,7 +444,7 @@ class SchemaReader {
   /// @throws StateError if the database connection is not initialized.
   /// @throws Exception if the database query fails.
   /// @private Internal helper method.
-  Future<List<SupabaseColumnInfo>> _readTableColumns(
+  Future<List<TetherColumnInfo>> _readTableColumns(
     String schema,
     String tableName,
   ) async {
@@ -452,7 +454,7 @@ class SchemaReader {
       );
     }
     _logger.fine('Reading columns for $schema.$tableName');
-    final columns = <SupabaseColumnInfo>[];
+    final columns = <TetherColumnInfo>[];
 
     final columnsResult = await _connection!.execute(
       Sql.named(
@@ -489,9 +491,7 @@ class SchemaReader {
     );
 
     for (final columnRow in columnsResult) {
-      columns.add(
-        SupabaseColumnInfo.fromRow(columnRow, StringUtils.toCamelCase),
-      );
+      columns.add(TetherColumnInfo.fromRow(columnRow, StringUtils.toCamelCase));
     }
     return columns;
   }

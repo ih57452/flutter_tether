@@ -867,7 +867,7 @@ packages:
       path: "../../packages/tether"
       relative: true
     source: path
-    version: "0.0.1"
+    version: "1.0.0"
   tether_libs:
     dependency: "direct main"
     description:

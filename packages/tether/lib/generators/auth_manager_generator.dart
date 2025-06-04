@@ -73,14 +73,6 @@ Future<void> _generateAuthManagerClassFile({
   final buffer = StringBuffer();
   final managersDir = p.join(config.outputDirectory, 'managers');
 
-  // Calculate relative paths
-  final modelsFilePath = p
-      .relative(config.modelsFilePath, from: managersDir)
-      .replaceAll(r'\', '/');
-  final schemaFilePath = p
-      .relative(config.generatedSupabaseSchemaDartFilePath, from: managersDir)
-      .replaceAll(r'\', '/');
-
   buffer.writeln('''
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: constant_identifier_names, library_private_types_in_public_api
@@ -89,12 +81,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart'; // For ValueNotifier
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sqlite_async/sqlite_async.dart'; // For SqliteConnection
+import 'package:tether_libs/client_manager/manager/client_manager_models.dart';
+import 'package:tether_libs/models/table_info.dart';
 import 'package:tether_libs/models/tether_model.dart';
-import 'package:tether_libs/client_manager/client_manager_models.dart'; // For SqlStatement, ClientManagerSqlUtils, SupabaseTableInfo
-
-// Relative imports based on output directory structure
-import '$modelsFilePath';
-import '$schemaFilePath';
 
 typedef _FromJsonFactory<T extends TetherModel<T>> = T Function(Map<String, dynamic> json);
 
@@ -228,7 +217,6 @@ class AuthManager<TProfileModel extends TetherModel<TProfileModel>> {
       final insertStatement = ClientManagerSqlUtils.buildInsertSql(
         [profileModel],
         _localProfileTableName,
-        tableInfo,
       );
       final finalSql = insertStatement.build();
       await _localDb.execute(finalSql.sql, finalSql.arguments);
@@ -297,40 +285,23 @@ Future<void> _generateAuthProvidersFile({
         from: providersDir,
       )
       .replaceAll(r'\', '/');
-  // Supabase client provider path is an assumption.
-  final supabaseClientProviderPath = p
-      .relative(
-        p.join(config.outputDirectory, 'supabase_provider.dart'),
-        from: providersDir,
-      )
-      .replaceAll(r'\', '/');
 
   buffer.writeln('''
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: constant_identifier_names
 
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // For User
 import '$authManagerPath';
 import '$modelsFilePath';
 import '$schemaFilePath';
 
-// It's assumed these providers are defined elsewhere and accessible.
-// Adjust paths if your structure is different.
-// e.g., if databaseProvider is in 'lib/database/database.dart'
-// and providers are in 'lib/generated/providers/'
-// then path would be '../../database/database.dart'
 import '$databaseProviderPath'; // Provides 'databaseProvider'
-// This path is an assumption, adjust if your SupabaseClient provider is elsewhere
-// e.g. if it's in 'lib/supabase_setup.dart'
-// then path would be '../../supabase_setup.dart'
-// For now, assuming a supabase_provider.dart in the outputDirectory
-import '$supabaseClientProviderPath'; // Provides 'supabaseClientProvider' 
-
 
 final authManagerProvider = Provider<AuthManager<$profileModelClassName>>((ref) {
-  final supabaseClient = ref.watch(supabaseClientProvider); 
+  final supabaseClient = Supabase.instance.client;
   final localDb = ref.watch(databaseProvider).requireValue.db; 
   final tableSchemas = globalSupabaseSchema; // Assumes globalSupabaseSchema is directly available via schemaFilePath import
 

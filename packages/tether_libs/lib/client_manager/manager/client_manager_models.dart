@@ -492,7 +492,7 @@ class ClientManagerSqlUtils {
     final localTableName = tableInfo.localName;
 
     // Correctly get List<SupabaseColumnInfo> first
-    final List<SupabaseColumnInfo> allColumnInfo = tableInfo.columns;
+    final List<TetherColumnInfo> allColumnInfo = tableInfo.columns;
 
     // Then map to List<String> for local column names
     final List<String> localColumnNames =

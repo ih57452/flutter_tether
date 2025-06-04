@@ -400,7 +400,7 @@ ${listContentBuffer.toString().trimRight()}
   /// Generates an `ALTER TABLE ... ADD COLUMN ...` statement. Returns null if column info is invalid.
   String? _generateAddColumnSql(
     String originalTableName,
-    SupabaseColumnInfo column,
+    TetherColumnInfo column,
   ) {
     final sqliteType = _mapPostgresToSqliteType(column.type);
     final quotedTableName = '"$originalTableName"';
@@ -769,7 +769,7 @@ ${listContentBuffer.toString().trimRight()}
   }
 
   // Add helper to format column info for warnings
-  String _columnToString(SupabaseColumnInfo col) {
+  String _columnToString(TetherColumnInfo col) {
     final pk = col.isPrimaryKey ? ' PK' : '';
     final nn = !col.isNullable ? ' NOT NULL' : '';
     final uq = col.isUnique ? ' UNIQUE' : '';
@@ -804,9 +804,9 @@ class _SchemaDiff {
   final Map<String, _TableDiff> modifiedTables = {}; // Key: original table name
 
   // Convenience maps for easier access in generator
-  final Map<String, List<SupabaseColumnInfo>> addedColumns =
+  final Map<String, List<TetherColumnInfo>> addedColumns =
       {}; // Key: original table name
-  final Map<String, List<SupabaseColumnInfo>> removedColumns =
+  final Map<String, List<TetherColumnInfo>> removedColumns =
       {}; // Key: original table name
   final Map<String, Map<String, _ColumnDiff>> modifiedColumns =
       {}; // Key: original table name, Inner Key: original column name
@@ -827,8 +827,8 @@ class _SchemaDiff {
 class _TableDiff {
   final SupabaseTableInfo previous;
   final SupabaseTableInfo current;
-  final List<SupabaseColumnInfo> addedColumns = [];
-  final List<SupabaseColumnInfo> removedColumns = [];
+  final List<TetherColumnInfo> addedColumns = [];
+  final List<TetherColumnInfo> removedColumns = [];
   final Map<String, _ColumnDiff> modifiedColumns =
       {}; // Key: original column name
   final List<SupabaseIndexInfo> addedIndexes = [];
@@ -847,8 +847,8 @@ class _TableDiff {
 }
 
 class _ColumnDiff {
-  final SupabaseColumnInfo previous;
-  final SupabaseColumnInfo current;
+  final TetherColumnInfo previous;
+  final TetherColumnInfo current;
   // Add specific flags for detected changes if needed (e.g., typeChanged, nullabilityChanged)
   _ColumnDiff(this.previous, this.current);
 }

@@ -59,8 +59,8 @@ class SupabaseSelectBuilderGenerator {
 
     // Generate and write the schema Dart file
     final schemaDartFileContent = _generateSchemaDartFileContent();
-    final schemaDartFilePath =
-        './${config.generatedSupabaseSchemaDartFilePath}';
+    final schemaDartFilePath = '${config.generatedSupabaseSchemaDartFilePath}';
+    _logger.info('Writing Supabase schema Dart file to $schemaDartFilePath');
     try {
       await _writeFile(schemaDartFilePath, schemaDartFileContent);
       _logger.info(
@@ -114,7 +114,7 @@ class SupabaseSelectBuilderGenerator {
       sb.writeln("    schema: ${_escapeStringForDart(table.schema)},");
       sb.writeln("    columns: [");
       for (final col in table.columns) {
-        sb.writeln("      SupabaseColumnInfo(");
+        sb.writeln("      TetherColumnInfo(");
         sb.writeln("        name: ${_escapeStringForDart(col.name)},");
         sb.writeln(
           "        originalName: ${_escapeStringForDart(col.originalName)},",
@@ -273,7 +273,7 @@ class SupabaseSelectBuilderGenerator {
     final enumName = StringUtils.toClassName(table.name, suffix: 'Column');
     final tableName = table.originalName;
 
-    sb.writeln('enum $enumName implements SupabaseColumn {');
+    sb.writeln('enum $enumName implements TetherColumn {');
 
     for (final column in table.columns) {
       final enumValueName = StringUtils.toCamelCase(column.localName);
@@ -312,7 +312,7 @@ class SupabaseSelectBuilderGenerator {
     sb.writeln();
     sb.writeln('  @override');
     sb.writeln(
-      '  SupabaseColumn related(String relationshipName) => RelatedColumnRef(originalName, localName, tableName, relationshipName);',
+      '  TetherColumn related(String relationshipName) => RelatedColumnRef(originalName, localName, tableName, relationshipName);',
     );
     sb.writeln('}');
     return sb.toString();
@@ -328,7 +328,7 @@ class SupabaseSelectBuilderGenerator {
     final tableUniqueKey =
         '${table.schema}.${table.originalName}'; // Use originalName for consistency
 
-    sb.writeln('class $className extends SupabaseSelectBuilderBase {');
+    sb.writeln('class $className extends SelectBuilderBase {');
     sb.writeln();
     // Constructor looks up its SupabaseTableInfo from globalSupabaseSchema
     // and passes it to the super constructor.

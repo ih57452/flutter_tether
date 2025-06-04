@@ -316,14 +316,17 @@ class SupabaseForeignKeyConstraint {
     required this.isDeferrable,
     required this.initiallyDeferred,
     this.joinTableName,
-  })  : localColumns = localColumns ??
-            originalColumns.map((col) => _makeSafeDartIdentifier(col)).toList(),
-        localForeignTableName = localForeignTableName ??
-            _makeSafeDartClassName(originalForeignTableName),
-        localForeignColumns = localForeignColumns ??
-            originalForeignColumns
-                .map((col) => _makeSafeDartIdentifier(col))
-                .toList();
+  }) : localColumns =
+           localColumns ??
+           originalColumns.map((col) => _makeSafeDartIdentifier(col)).toList(),
+       localForeignTableName =
+           localForeignTableName ??
+           _makeSafeDartClassName(originalForeignTableName),
+       localForeignColumns =
+           localForeignColumns ??
+           originalForeignColumns
+               .map((col) => _makeSafeDartIdentifier(col))
+               .toList();
 
   /// Creates a Dart-safe identifier from a given [name].
   /// Appends "Field" if [name] is a Dart keyword.
@@ -488,7 +491,7 @@ class SupabaseForeignKeyConstraint {
     }
 
     // Combine the base name with the foreign table name to ensure uniqueness
-    return '${baseName}${StringUtils.capitalize(StringUtils.toCamelCase(originalForeignTableName))}';
+    return '$baseName${StringUtils.capitalize(StringUtils.toCamelCase(originalForeignTableName))}';
   }
 
   @override
@@ -497,7 +500,7 @@ class SupabaseForeignKeyConstraint {
 }
 
 /// Represents details about a single column within a database table.
-class SupabaseColumnInfo {
+class TetherColumnInfo {
   /// The name of the column, converted to camelCase for Dart conventions.
   /// Example: `user_name` becomes `userName`.
   final String name;
@@ -533,8 +536,8 @@ class SupabaseColumnInfo {
   /// For PostgreSQL, this corresponds to `is_identity = \'YES\'`.
   final bool isIdentity;
 
-  /// Creates an instance of [SupabaseColumnInfo].
-  SupabaseColumnInfo({
+  /// Creates an instance of [TetherColumnInfo].
+  TetherColumnInfo({
     required this.name,
     required this.originalName,
     String? localName,
@@ -553,7 +556,7 @@ class SupabaseColumnInfo {
     return _dartKeywords.contains(name) ? '${name}Field' : name;
   }
 
-  /// Creates a [SupabaseColumnInfo] instance from a raw SQL query result row.
+  /// Creates a [TetherColumnInfo] instance from a raw SQL query result row.
   ///
   /// The [row] is a list of values corresponding to column attributes fetched
   /// from the database\'s information schema. The exact indices depend on the
@@ -569,7 +572,7 @@ class SupabaseColumnInfo {
   /// - `is_primary_key` (bool, from joining with constraints) -> `row[5]`
   /// - `is_unique` (bool, from joining with constraints) -> `row[6]`
   /// - `is_identity` (String: 'YES'/'NO') -> `row[7]` (Adjust `indexOfIsIdentity` if different)
-  factory SupabaseColumnInfo.fromRow(
+  factory TetherColumnInfo.fromRow(
     List<dynamic> row,
     String Function(String) nameConverter,
   ) {
@@ -593,7 +596,7 @@ class SupabaseColumnInfo {
     }
     // Add more checks if other representations are possible
 
-    return SupabaseColumnInfo(
+    return TetherColumnInfo(
       name: nameConverter(originalDbName),
       originalName: originalDbName,
       localName: _makeSafeDartIdentifier(originalDbName),
@@ -614,7 +617,7 @@ class SupabaseColumnInfo {
     );
   }
 
-  /// Converts this [SupabaseColumnInfo] instance to a JSON map for serialization.
+  /// Converts this [TetherColumnInfo] instance to a JSON map for serialization.
   Map<String, dynamic> toJson() => {
     'name': name,
     'originalName': originalName,
@@ -628,12 +631,12 @@ class SupabaseColumnInfo {
     'isIdentity': isIdentity, // <<< ADDED TO toJson
   };
 
-  /// Creates a [SupabaseColumnInfo] instance from a JSON map (deserialization).
+  /// Creates a [TetherColumnInfo] instance from a JSON map (deserialization).
   /// Handles missing fields from older data formats with default values.
-  factory SupabaseColumnInfo.fromJson(Map<String, dynamic> json) {
+  factory TetherColumnInfo.fromJson(Map<String, dynamic> json) {
     final originalName =
         json['originalName'] as String? ?? json['name'] as String;
-    return SupabaseColumnInfo(
+    return TetherColumnInfo(
       name: json['name'] as String,
       originalName: originalName,
       localName:
@@ -733,8 +736,8 @@ class SupabaseTableInfo {
   /// The database schema the table belongs to (e.g., `public`).
   final String schema;
 
-  /// A list of [SupabaseColumnInfo] objects representing the columns in this table.
-  final List<SupabaseColumnInfo> columns;
+  /// A list of [TetherColumnInfo] objects representing the columns in this table.
+  final List<TetherColumnInfo> columns;
 
   /// A list of [SupabaseForeignKeyConstraint] objects representing the foreign keys
   /// defined on this table.
@@ -818,9 +821,7 @@ class SupabaseTableInfo {
       schema: json['schema'] as String? ?? '',
       columns:
           (json['columns'] as List?)
-              ?.map(
-                (c) => SupabaseColumnInfo.fromJson(c as Map<String, dynamic>),
-              )
+              ?.map((c) => TetherColumnInfo.fromJson(c as Map<String, dynamic>))
               .toList() ??
           [],
       foreignKeys:
@@ -873,7 +874,7 @@ class SupabaseTableInfo {
   }
 
   /// Gets a list of columns that are part of the primary key for this table.
-  List<SupabaseColumnInfo> get primaryKeys =>
+  List<TetherColumnInfo> get primaryKeys =>
       columns.where((col) => col.isPrimaryKey).toList();
 
   /// Gets a list of foreign key constraints that involve the specified [columnName].

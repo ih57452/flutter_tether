@@ -84,7 +84,7 @@ generation:
     # output_path: 'lib/database/supabase_select_builders.g.dart'
     # The filename for the main generated select builders file.
     # This file will be placed within 'output_directory' unless 'output_path' is specified.
-    filename: 'supabase_select_builders.g.dart'
+    filename: 'select_builders.g.dart'
 
     # The full path (relative to the project root) for the generated Dart file that will contain
     # the `globalSupabaseSchema` map. This map holds schema information used by the select builders at runtime.

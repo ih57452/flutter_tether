@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example/database/models.g.dart';
 import 'package:example/database/providers/feed_provider.dart';
-import 'package:example/database/supabase_select_builders.dart';
+import 'package:example/database/supabase_select_builders.g.dart';
 import 'package:example/models/selects.dart';
 import 'package:example/database/managers/books_client_manager.g.dart';
 import 'package:example/database/managers/genres_client_manager.g.dart';

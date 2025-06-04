@@ -43,10 +43,10 @@ typedef QueryBuilderFactory<TModel extends TetherModel<TModel>> =
 class FeedStreamNotifierSettings<TModel extends TetherModel<TModel>>
     extends Equatable {
   final String feedKey;
-  final SupabaseColumn? searchColumn; // Made nullable
+  final TetherColumn? searchColumn; // Made nullable
   final int pageSize;
   final ClientManager<TModel> clientManager;
-  final SupabaseSelectBuilderBase selectArgs;
+  final SelectBuilderBase selectArgs;
   final TModel Function(Map<String, dynamic> json) fromJsonFactory;
   final ClientManagerFilterBuilder<TModel> Function(
     ClientManagerFilterBuilder<TModel> baseQuery,
@@ -161,7 +161,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
     // Use the base query (with static customizer) for determining table name and selector for SQL
     final baseQueryForSchema = _getBaseQueryForFeedStreamSchema();
     final modelTableName = baseQueryForSchema.tableName;
-    final SupabaseSelectBuilderBase? selector =
+    final SelectBuilderBase? selector =
         baseQueryForSchema.selectorStatement;
 
     if (selector == null) {

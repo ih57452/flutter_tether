@@ -1,10 +1,10 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // Migration version: 1
-// Generated on 2025-05-30 09:26:08.631123
+// Generated on 2025-06-04 09:56:09.498592
 
 const List<String> migrationSqlStatementsV1 = [
   '''-- Initial Schema (Version 1)''',
-  '''-- Generated on 2025-05-30 09:26:08.624687''',
+  '''-- Generated on 2025-06-04 09:56:09.492873''',
   r'''
 CREATE TABLE IF NOT EXISTS "bookstores" (
   "address" TEXT,

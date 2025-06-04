@@ -1,8 +1,8 @@
 {
-  "label": "Tutorial - Basics",
-  "position": 11,
+  "label": "Additional Features",
+  "position": 7,
   "link": {
     "type": "generated-index",
-    "description": "5 minutes to learn the most important Docusaurus concepts."
+    "description": "Additional features of the Tether system."
   }
 }

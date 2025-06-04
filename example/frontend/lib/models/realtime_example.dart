@@ -1,5 +1,5 @@
 import 'package:example/database/managers/genres_client_manager.g.dart';
-import 'package:example/database/supabase_select_builders.dart';
+import 'package:example/database/supabase_select_builders.g.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final realtimeProvider = StreamProvider.autoDispose((ref) {

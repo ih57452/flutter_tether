@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import type {JSX, ReactNode} from 'react';
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
@@ -6,37 +6,36 @@ import styles from './styles.module.css';
 type FeatureItem = {
   title: string;
   Svg: React.ComponentType<React.ComponentProps<'svg'>>;
-  description: ReactNode;
+  description: JSX.Element;
 };
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'Seamless Supabase Integration',
+    Svg: require('@site/static/img/01_create.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Flutter Tether simplifies connecting your Flutter app to Supabase,
+        automating local database mirroring and Dart model generation from your schema.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Focus on Your App Logic',
+    Svg: require('@site/static/img/02_build.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Let Tether handle the complexities of data synchronization, caching,
+        optimistic updates, and conflict resolution. You focus on building great features.
       </>
     ),
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Powerful & Flexible',
+    Svg: require('@site/static/img/03_features.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Leverage robust query builders, real-time data streaming, and helpful utilities for common tasks like auth and feeds.
       </>
     ),
   },

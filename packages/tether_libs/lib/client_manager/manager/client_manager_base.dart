@@ -17,12 +17,12 @@ class ClientManagerBase<TModel extends TetherModel<TModel>>
   final SupabaseClient client;
   final PostgrestBuilder supabase;
   final SqlOperationType? type;
-  final SupabaseSelectBuilderBase? selector;
+  final SelectBuilderBase? selector;
   final bool syncWithSupabase;
   static const Duration defaultTimeout = Duration(seconds: 15);
   final Map<String, SupabaseTableInfo>
   tableSchemas; // Keys are fully qualified, e.g., "public.books"
-  SupabaseSelectBuilderBase? selectorStatement;
+  SelectBuilderBase? selectorStatement;
   SqlStatement? localQuery;
   bool maybeSingle;
   bool isRemoteOnly;

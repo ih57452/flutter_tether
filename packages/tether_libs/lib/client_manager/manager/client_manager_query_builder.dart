@@ -31,7 +31,7 @@ class ClientManagerQueryBuilder<TModel extends TetherModel<TModel>>
     required PostgrestFilterBuilder<dynamic> supabase,
     SqlOperationType? type,
     SqlStatement? localQuery,
-    SupabaseSelectBuilderBase? selectorStatement,
+    SelectBuilderBase? selectorStatement,
   }) {
     return ClientManagerFilterBuilder(
       tableName: tableName,
@@ -49,7 +49,7 @@ class ClientManagerQueryBuilder<TModel extends TetherModel<TModel>>
     );
   }
 
-  ClientManagerFilterBuilder<TModel> select(SupabaseSelectBuilderBase select) {
+  ClientManagerFilterBuilder<TModel> select(SelectBuilderBase select) {
     final PostgrestFilterBuilder<List<Map<String, dynamic>>> supabaseBuilder =
         supabase.select(select.buildSupabase());
 

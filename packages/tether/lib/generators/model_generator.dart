@@ -276,7 +276,7 @@ class ModelGenerator {
     final className = _getDartClassName(table);
     final tableName = table.originalName;
     final pkColumns = table.primaryKeys;
-    SupabaseColumnInfo? primaryKeyColumn;
+    TetherColumnInfo? primaryKeyColumn;
     String idFieldName = 'id';
     String idDartType = 'dynamic';
 
@@ -715,7 +715,7 @@ class ModelGenerator {
   /// Generates the Dart code snippet for converting a JSON/DB value to the field type.
   void _generateFromJsonConversion(
     StringBuffer buffer,
-    SupabaseColumnInfo column,
+    TetherColumnInfo column,
     String key, {
     String mapVariableName = 'json',
     bool fromSqlite = false,
@@ -805,7 +805,7 @@ class ModelGenerator {
   /// Generates the Dart code snippet for converting a field value to JSON or SQLite map value.
   void _generateToJsonConversion(
     StringBuffer buffer,
-    SupabaseColumnInfo column,
+    TetherColumnInfo column,
     String fieldName, {
     required String target, // 'json' or 'sqlite'
   }) {

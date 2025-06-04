@@ -12,14 +12,14 @@ import 'package:tether_libs/models/table_info.dart';
 // We assume `globalSupabaseSchema` will be accessible in the context
 // where SupabaseSelectBuilderBase's constructor is called (i.e., from generated builders).
 
-/// Represents a link to a related [SupabaseSelectBuilderBase] for constructing nested queries.
+/// Represents a link to a related [SelectBuilderBase] for constructing nested queries.
 ///
 /// This class holds a [builder] for the related table, the [fkConstraintName]
 /// that defines the relationship, and a flag [innerJoin] to specify if an
 /// inner join should be used (relevant for Supabase PostgREST queries).
 class RelatedBuilderLink {
-  /// The [SupabaseSelectBuilderBase] for the related table.
-  final SupabaseSelectBuilderBase builder;
+  /// The [SelectBuilderBase] for the related table.
+  final SelectBuilderBase builder;
 
   /// The name of the foreign key constraint that establishes this link.
   /// This is crucial for PostgREST to correctly identify the relationship.
@@ -135,7 +135,7 @@ abstract class TetherColumn {
 /// final sqliteStatement = usersBuilder.buildSelectWithNestedData();
 /// // sqliteStatement.sql would be a complex SQL query using json_object and json_group_array
 /// ```
-abstract class SupabaseSelectBuilderBase {
+abstract class SelectBuilderBase {
   final Logger _logger = Logger('SupabaseSelectBuilderBase');
 
   /// The unique key (often primary key name) of the primary table for this builder.
@@ -158,13 +158,13 @@ abstract class SupabaseSelectBuilderBase {
   /// will be selected.
   bool selectAllPrimary = false;
 
-  /// Constructs a [SupabaseSelectBuilderBase].
+  /// Constructs a [SelectBuilderBase].
   ///
   /// - `primaryTableKey`: The name of the primary key column for `currentTableInfo`.
   ///   While this could be derived from `currentTableInfo.primaryKeys`, passing it
   ///   explicitly can simplify logic or handle cases with composite/no standard PK.
   /// - `currentTableInfo`: The [SupabaseTableInfo] for the table this builder targets.
-  SupabaseSelectBuilderBase({
+  SelectBuilderBase({
     required this.primaryTableKey,
     required this.currentTableInfo,
   }) {
@@ -189,7 +189,7 @@ abstract class SupabaseSelectBuilderBase {
   /// This overrides any previous specific column selections made by [selectSupabaseColumns].
   ///
   /// Returns `this` builder instance for chaining.
-  T selectAll<T extends SupabaseSelectBuilderBase>() {
+  T selectAll<T extends SelectBuilderBase>() {
     selectAllPrimary = true;
     selectedPrimaryColumns.clear();
     return this as T;
@@ -202,7 +202,7 @@ abstract class SupabaseSelectBuilderBase {
   /// This sets `selectAllPrimary` to `false`.
   ///
   /// Returns `this` builder instance for chaining.
-  T selectSupabaseColumns<T extends SupabaseSelectBuilderBase>(
+  T selectSupabaseColumns<T extends SelectBuilderBase>(
     List<String> dbColumnNames,
   ) {
     selectedPrimaryColumns.clear();
@@ -218,7 +218,7 @@ abstract class SupabaseSelectBuilderBase {
   /// - `fkConstraintName`: The exact name of the foreign key constraint in the database
   ///   that defines the relationship between the current table and the nested table.
   ///   This is crucial for PostgREST to correctly identify and join the tables.
-  /// - `nestedBuilder`: A [SupabaseSelectBuilderBase] instance configured for the
+  /// - `nestedBuilder`: A [SelectBuilderBase] instance configured for the
   ///   related table (e.g., an `AuthorsBuilder` or `PostsBuilder`). This builder
   ///   defines which columns are selected from the related table and any further
   ///   nested relationships.
@@ -240,7 +240,7 @@ abstract class SupabaseSelectBuilderBase {
   void addSupabaseRelated({
     required String jsonKey,
     required String fkConstraintName,
-    required SupabaseSelectBuilderBase nestedBuilder,
+    required SelectBuilderBase nestedBuilder,
     bool innerJoin = false,
   }) {
     if (supabaseRelatedBuilders.containsKey(jsonKey)) {
@@ -369,7 +369,7 @@ abstract class SupabaseSelectBuilderBase {
     final List<String> jsonFields = []; // For 'key', value, 'key', value ...
 
     // 1. Determine and add direct columns of this builder's table to the JSON object.
-    List<SupabaseColumnInfo> columnsForThisLevelJson;
+    List<TetherColumnInfo> columnsForThisLevelJson;
     if (selectAllPrimary) {
       columnsForThisLevelJson = currentTableInfo.columns;
     } else if (selectedPrimaryColumns.isNotEmpty) {

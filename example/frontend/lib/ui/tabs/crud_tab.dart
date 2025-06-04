@@ -1,4 +1,4 @@
-import 'package:example/database/supabase_select_builders.dart';
+import 'package:example/database/supabase_select_builders.g.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tether_libs/utils/string_utils.dart';

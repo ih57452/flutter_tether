@@ -81,14 +81,14 @@ class SupabaseGenConfig {
     this.databaseName = 'app_db.sqlite',
     this.generateSupabaseSelectBuilders = false,
     this.supabaseSelectBuildersFilePath =
-        'lib/database/supabase_select_builders.dart',
-    this.generatedSupabaseSchemaDartFilePath = 'supabase_schema.dart',
+        'lib/database/supabase_select_builders.g.dart',
+    this.generatedSupabaseSchemaDartFilePath =
+        'lib/database/supabase_schema.dart',
 
     // SQLite Migration Settings
     this.generateSqliteMigrations = false,
     this.sqliteMigrationsSubDir = 'assets/sqlite_migrations',
 
-    // NEW FIELDS
     this.schemaRegistryFilePath = 'lib/database/schema_registry.dart',
     this.databaseImportPath = '../database/my_database.dart',
 
@@ -103,10 +103,10 @@ class SupabaseGenConfig {
     this.generateProviders = true,
 
     // --- Authentication Settings ---
-    this.generateAuthentication = false, // Default to false
+    this.generateAuthentication = true, // Default to false
     this.authProfileTableName = 'profiles', // Default table name
     // --- Background Services Settings ---
-    this.generateBackgroundServices = false, // Default to false
+    this.generateBackgroundServices = true, // Default to true
   });
 
   factory SupabaseGenConfig.fromYaml(
@@ -126,9 +126,10 @@ class SupabaseGenConfig {
         genConfig['providers'] as Map<String, dynamic>? ?? {};
     final outputDir = // This correctly uses genConfig['output_directory'] or defaults
         genConfig['output_directory'] as String? ?? 'lib/database';
-    final authConfig = yaml['authentication'] as Map<String, dynamic>? ?? {};
+    final authConfig =
+        genConfig['authentication'] as Map<String, dynamic>? ?? {};
     final backgroundConfig =
-        yaml['background_services'] as Map<String, dynamic>? ?? {};
+        genConfig['background_services'] as Map<String, dynamic>? ?? {};
 
     return SupabaseGenConfig(
       // Database, General...
@@ -174,11 +175,13 @@ class SupabaseGenConfig {
           selectBuildersConfig['enabled'] as bool? ?? false,
       supabaseSelectBuildersFilePath:
           selectBuildersConfig['output_path'] as String? ??
-          p.join(outputDir, 'supabase_select_builders.dart'),
+          p.join(outputDir, 'supabase_select_builders.g.dart'),
       generatedSupabaseSchemaDartFilePath:
           p.join(
                 outputDir,
-                selectBuildersConfig['generated_schema_dart_file_name'],
+                selectBuildersConfig['generated_schema_dart_file_name']
+                        as String? ??
+                    'supabase_schema.dart',
               )
               as String? ??
           p.join(outputDir, 'supabase_schema.dart'),
@@ -200,12 +203,12 @@ class SupabaseGenConfig {
       generateProviders: providerConfig['enabled'] as bool? ?? true,
 
       // --- Authentication Settings ---
-      generateAuthentication: authConfig['enabled'] as bool? ?? false,
+      generateAuthentication: authConfig['enabled'] as bool? ?? true,
       authProfileTableName:
           authConfig['profile_table'] as String? ?? 'profiles',
 
       // --- Background Services Settings ---
-      generateBackgroundServices: backgroundConfig['enabled'] as bool? ?? false,
+      generateBackgroundServices: backgroundConfig['enabled'] as bool? ?? true,
     );
   }
 

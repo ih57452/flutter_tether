@@ -4,6 +4,7 @@ import 'package:tether/generators/auth_manager_generator.dart';
 import 'package:tether/generators/background_service_manager_generator.dart';
 import 'package:tether/utils/schema_reader.dart';
 import 'package:tether/utils/schema_version_manager.dart';
+import 'package:tether/utils/schema_writer.dart';
 import 'package:tether_libs/utils/logger.dart';
 
 import 'generators/client_manager_generator.dart';
@@ -40,6 +41,12 @@ class SupabaseGenerator {
 
       final tables = await schemaReader.readTables();
       _logger.info('Read schema for ${tables.length} tables');
+
+      final writer = SchemaWriter(config, tables);
+      await writer.writeGlobalSchemaFile();
+      _logger.info(
+        'Generated global schema file: ${config.generatedSupabaseSchemaDartFilePath}',
+      );
 
       // Generate Core SQLite Migration (e.g., for feed_item_references)
       // This runs first to define base tables if needed.
@@ -107,8 +114,8 @@ class SupabaseGenerator {
 
       // Generate Background Services
       if (config.generateBackgroundServices) {
-        await generateBackgroundJobManagerProviderFile;
-        _logger.info('Generated background provider for FeedManager.');
+        await generateBackgroundJobManagerProviderFile(config: config);
+        _logger.info('Generated background provider.');
       }
 
       // Generate providers

@@ -12,7 +12,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
     localName: "bookstores",
     schema: "public",
     columns: [
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "address",
         originalName: "address",
         localName: "address",
@@ -23,7 +23,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "createdAt",
         originalName: "created_at",
         localName: "created_at",
@@ -34,7 +34,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "now()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "establishedDate",
         originalName: "established_date",
         localName: "established_date",
@@ -45,7 +45,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "id",
         originalName: "id",
         localName: "id",
@@ -56,7 +56,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "uuid_generate_v4()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "isOpen",
         originalName: "is_open",
         localName: "is_open",
@@ -67,7 +67,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "true",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "name",
         originalName: "name",
         localName: "name",
@@ -78,7 +78,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "updatedAt",
         originalName: "updated_at",
         localName: "updated_at",
@@ -125,7 +125,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
     localName: "authors",
     schema: "public",
     columns: [
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "bio",
         originalName: "bio",
         localName: "bio",
@@ -136,7 +136,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "birthDate",
         originalName: "birth_date",
         localName: "birth_date",
@@ -147,7 +147,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "createdAt",
         originalName: "created_at",
         localName: "created_at",
@@ -158,7 +158,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "now()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "deathDate",
         originalName: "death_date",
         localName: "death_date",
@@ -169,7 +169,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "document",
         originalName: "document",
         localName: "document",
@@ -180,7 +180,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "firstName",
         originalName: "first_name",
         localName: "first_name",
@@ -191,7 +191,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "id",
         originalName: "id",
         localName: "id",
@@ -202,7 +202,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "uuid_generate_v4()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "lastName",
         originalName: "last_name",
         localName: "last_name",
@@ -213,7 +213,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "updatedAt",
         originalName: "updated_at",
         localName: "updated_at",
@@ -268,7 +268,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
     localName: "genres",
     schema: "public",
     columns: [
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "createdAt",
         originalName: "created_at",
         localName: "created_at",
@@ -279,7 +279,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "now()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "description",
         originalName: "description",
         localName: "description",
@@ -290,7 +290,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "id",
         originalName: "id",
         localName: "id",
@@ -301,7 +301,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "uuid_generate_v4()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "name",
         originalName: "name",
         localName: "name",
@@ -312,7 +312,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "updatedAt",
         originalName: "updated_at",
         localName: "updated_at",
@@ -367,7 +367,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
     localName: "images",
     schema: "public",
     columns: [
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "altText",
         originalName: "alt_text",
         localName: "alt_text",
@@ -378,7 +378,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "createdAt",
         originalName: "created_at",
         localName: "created_at",
@@ -389,7 +389,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "now()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "id",
         originalName: "id",
         localName: "id",
@@ -400,7 +400,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "uuid_generate_v4()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "updatedAt",
         originalName: "updated_at",
         localName: "updated_at",
@@ -411,7 +411,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "now()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "url",
         originalName: "url",
         localName: "url",
@@ -455,7 +455,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
     localName: "books",
     schema: "public",
     columns: [
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "authorId",
         originalName: "author_id",
         localName: "author_id",
@@ -466,7 +466,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "bannerImageId",
         originalName: "banner_image_id",
         localName: "banner_image_id",
@@ -477,7 +477,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "coverImageId",
         originalName: "cover_image_id",
         localName: "cover_image_id",
@@ -488,7 +488,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "createdAt",
         originalName: "created_at",
         localName: "created_at",
@@ -499,7 +499,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "now()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "description",
         originalName: "description",
         localName: "description",
@@ -510,7 +510,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "document",
         originalName: "document",
         localName: "document",
@@ -521,7 +521,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "id",
         originalName: "id",
         localName: "id",
@@ -532,7 +532,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "uuid_generate_v4()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "metadata",
         originalName: "metadata",
         localName: "metadata",
@@ -543,7 +543,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "price",
         originalName: "price",
         localName: "price",
@@ -554,7 +554,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "publicationDate",
         originalName: "publication_date",
         localName: "publication_date",
@@ -565,7 +565,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "stockCount",
         originalName: "stock_count",
         localName: "stock_count",
@@ -576,7 +576,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "0",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "tags",
         originalName: "tags",
         localName: "tags",
@@ -587,7 +587,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "title",
         originalName: "title",
         localName: "title",
@@ -598,7 +598,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "updatedAt",
         originalName: "updated_at",
         localName: "updated_at",
@@ -723,7 +723,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
     localName: "book_genres",
     schema: "public",
     columns: [
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "bookId",
         originalName: "book_id",
         localName: "book_id",
@@ -734,7 +734,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "genreId",
         originalName: "genre_id",
         localName: "genre_id",
@@ -745,7 +745,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "id",
         originalName: "id",
         localName: "id",
@@ -841,7 +841,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
     localName: "bookstore_books",
     schema: "public",
     columns: [
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "bookId",
         originalName: "book_id",
         localName: "book_id",
@@ -852,7 +852,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "bookstoreId",
         originalName: "bookstore_id",
         localName: "bookstore_id",
@@ -863,7 +863,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "id",
         originalName: "id",
         localName: "id",
@@ -959,7 +959,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
     localName: "profiles",
     schema: "public",
     columns: [
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "avatarUrl",
         originalName: "avatar_url",
         localName: "avatar_url",
@@ -970,7 +970,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "createdAt",
         originalName: "created_at",
         localName: "created_at",
@@ -981,7 +981,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "now()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "fullName",
         originalName: "full_name",
         localName: "full_name",
@@ -992,7 +992,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "id",
         originalName: "id",
         localName: "id",
@@ -1003,7 +1003,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "updatedAt",
         originalName: "updated_at",
         localName: "updated_at",
@@ -1014,7 +1014,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: "now()",
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "username",
         originalName: "username",
         localName: "username",
@@ -1025,7 +1025,7 @@ final Map<String, SupabaseTableInfo> globalSupabaseSchema = {
         defaultValue: null,
         comment: null,
       ),
-      SupabaseColumnInfo(
+      TetherColumnInfo(
         name: "website",
         originalName: "website",
         localName: "website",

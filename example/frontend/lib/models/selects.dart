@@ -1,4 +1,4 @@
-import 'package:example/database/supabase_select_builders.dart';
+import 'package:example/database/supabase_select_builders.g.dart';
 
 final imageSelect = ImagesSelectBuilder().select();
 final genreSelect = GenresSelectBuilder().select();
