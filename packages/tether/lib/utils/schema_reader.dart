@@ -1,6 +1,3 @@
-// lib/src/schema/schema_reader.dart
-import 'dart:io';
-
 import 'package:collection/collection.dart'; // Added import
 import 'package:postgres/postgres.dart';
 import 'package:tether/config/config_model.dart';
@@ -494,93 +491,6 @@ class SchemaReader {
       columns.add(TetherColumnInfo.fromRow(columnRow, StringUtils.toCamelCase));
     }
     return columns;
-  }
-
-  /// Determines if a table should be processed based on include/exclude rules in the config.
-  ///
-  /// The logic follows these rules:
-  /// 1. If `includeTables` is not empty, only tables matching any pattern in `includeTables` are processed.
-  /// 2. If `includeTables` is empty and `excludeTables` is not empty, tables matching any pattern in `excludeTables` are skipped.
-  /// 3. If both `includeTables` and `excludeTables` are empty, the `generateForAllTables` flag decides (default is usually true).
-  ///
-  /// Patterns can be simple names (`users`) or schema-qualified (`public.users`).
-  /// Wildcards (`*`) are supported in patterns (e.g., `auth.*`, `user*`).
-  ///
-  /// @param schema The schema name of the table.
-  /// @param tableName The name of the table.
-  /// @return `true` if the table should be processed, `false` otherwise.
-  ///
-  /// {@tool example} Scenarios:
-  /// ```dart
-  /// // Config: includeTables: ['public.users', 'auth.*'], excludeTables: [], generateForAllTables: false
-  /// _shouldProcessTable('public', 'users') // -> true
-  /// _shouldProcessTable('auth', 'sessions') // -> true
-  /// _shouldProcessTable('public', 'posts') // -> false (not in include list)
-  /// _shouldProcessTable('storage', 'objects') // -> false (not in include list)
-  ///
-  /// // Config: includeTables: [], excludeTables: ['private.*', 'temp_table'], generateForAllTables: true
-  /// _shouldProcessTable('public', 'users') // -> true (not excluded)
-  /// _shouldProcessTable('private', 'keys') // -> false (matches 'private.*')
-  /// _shouldProcessTable('public', 'temp_table') // -> false (matches 'temp_table')
-  /// _shouldProcessTable('auth', 'sessions') // -> true (not excluded)
-  ///
-  /// // Config: includeTables: [], excludeTables: [], generateForAllTables: false
-  /// _shouldProcessTable('public', 'users') // -> false (generateForAllTables is false)
-  ///
-  /// // Config: includeTables: [], excludeTables: [], generateForAllTables: true
-  /// _shouldProcessTable('public', 'users') // -> true (generateForAllTables is true)
-  /// ```
-  /// {@end-tool}
-  /// @private Internal helper method.
-  bool _shouldProcessTable(String schema, String tableName) {
-    // 1. Check include list first - if it's defined, only includes matter.
-    if (config.includeTables.isNotEmpty) {
-      for (final pattern in config.includeTables) {
-        final parts = pattern.split('.');
-        if (parts.length == 2) {
-          // Schema-qualified pattern (e.g., "public.users", "auth.*")
-          final schemaPattern = parts[0];
-          final tablePattern = parts[1];
-          if (_matchesPattern(schema, schemaPattern) &&
-              _matchesPattern(tableName, tablePattern)) {
-            return true; // Found a match in include list
-          }
-        } else {
-          // Table name only pattern (e.g., "users", "*") - matches any schema
-          if (_matchesPattern(tableName, pattern)) {
-            return true; // Found a match in include list
-          }
-        }
-      }
-      // If includeTables is defined but no pattern matched, explicitly exclude the table.
-      return false;
-    }
-
-    // 2. Check exclude list if include list was empty.
-    if (config.excludeTables.isNotEmpty) {
-      for (final pattern in config.excludeTables) {
-        final parts = pattern.split('.');
-        if (parts.length == 2) {
-          // Schema-qualified pattern
-          final schemaPattern = parts[0];
-          final tablePattern = parts[1];
-          if (_matchesPattern(schema, schemaPattern) &&
-              _matchesPattern(tableName, tablePattern)) {
-            return false; // Found a match in exclude list, skip the table.
-          }
-        } else {
-          // Table name only pattern
-          if (_matchesPattern(tableName, pattern)) {
-            return false; // Found a match in exclude list, skip the table.
-          }
-        }
-      }
-      // If excludeTables is defined but no pattern matched, the table is implicitly included (subject to step 3).
-    }
-
-    // 3. If no include/exclude lists determined the outcome, rely on the global flag.
-    // This is reached if includeTables is empty AND (excludeTables is empty OR excludeTables didn't match).
-    return config.generateForAllTables;
   }
 
   // --- Helper Function: _readTableForeignKeys ---

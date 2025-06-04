@@ -11,5 +11,13 @@ Then, go into the `/frontend` directory and run the following command to start
 the Flutter app:
 
 ```bash
+dart run tether --config tether_config.yaml
+```
+
+This will generate the necessary files in the `lib/database` directory.
+
+Finally, run the Flutter app:
+
+```bash
 flutter run
 ```

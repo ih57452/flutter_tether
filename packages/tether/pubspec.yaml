@@ -23,5 +23,4 @@ dev_dependencies:
   test: ^1.25.8
 
 executables:
-  tether:
-    script: bin/tether.dart
+  tether: tether

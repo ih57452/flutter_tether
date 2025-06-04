@@ -89,7 +89,7 @@ class SchemaVersionManager {
                 }
               } catch (e, s) {
                 _logger.severe(
-                  'Failed to load or parse schema file ${entity.path}: $e',
+                  'Failed to load or parse schema file ${entity.path}: $e $s',
                 );
               }
             }
@@ -98,7 +98,7 @@ class SchemaVersionManager {
       }
     } catch (e, s) {
       _logger.severe(
-        'Error listing schema version files in $_schemaVersionsDir: $e',
+        'Error listing schema version files in $_schemaVersionsDir: $e $s',
       );
     }
 

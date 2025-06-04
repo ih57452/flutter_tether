@@ -1,4 +1,5 @@
-// lib/src/config/config_loader.dart
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+
 import 'dart:io';
 import 'package:yaml/yaml.dart';
 import 'package:dotenv/dotenv.dart' as dotenv; // Import dotenv
@@ -98,9 +99,6 @@ generation:
     prefix: ''
     suffix: Model
     use_null_safety: true
-
-  supabase_selectors:
-    enabled: true 
 
   supabase_select_builders:
     enabled: true 
