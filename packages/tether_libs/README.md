@@ -4,6 +4,12 @@
 core functionality needed to build robust Flutter applications with Supabase
 integration, local SQLite caching, and powerful data management capabilities.
 
+See the [Tether documentation](https://cspecter.github.io/flutter_tether/) for
+more details on how to use this package effectively.
+
+Check the core library [tether](https://pub.dev/packages/tether) for code
+generation.
+
 [![Pub Version](https://img.shields.io/pub/v/tether_libs)](https://pub.dev/packages/tether_libs)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
