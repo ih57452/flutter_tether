@@ -216,7 +216,7 @@ final postsWithLikes = PostsSelectBuilder()
   .select()
   .withLikes(UsersSelectBuilder().select()innerJoin: true);
 
-final postsWithLikes = await postsManager.query().select(postsWithLikes)
+final postsWithLikes = await postsManager.query.select(postsWithLikes)
   .eq(LikesColumn.userId, 'some-user-id');
 ```
 

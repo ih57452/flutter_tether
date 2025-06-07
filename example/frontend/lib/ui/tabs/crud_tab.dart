@@ -13,7 +13,7 @@ import 'package:example/models/selects.dart'; // Contains genreSelect for fetchi
 final genresListProvider = StreamProvider.autoDispose<List<GenreModel>>((ref) {
   final genreManager = ref.watch(genresManagerProvider);
   // Fetch genres using the predefined 'genreSelect' for consistency
-  return genreManager.query().select(genreSelect).asStream();
+  return genreManager.query.select(genreSelect).asStream();
 });
 
 class CrudTab extends ConsumerStatefulWidget {
@@ -63,7 +63,7 @@ class _CrudTabState extends ConsumerState<CrudTab> {
       try {
         if (_editingGenreId == null) {
           // Create
-          await genreManager.query().insert([genreData]);
+          await genreManager.query.insert([genreData]);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Genre created successfully!')),
@@ -71,8 +71,7 @@ class _CrudTabState extends ConsumerState<CrudTab> {
           }
         } else {
           // Update
-          await genreManager
-              .query()
+          await genreManager.query
               .update(value: genreData)
               .eq(GenresColumn.id, genreData.id);
           if (mounted) {
@@ -102,13 +101,13 @@ class _CrudTabState extends ConsumerState<CrudTab> {
       final genreManager = ref.read(genresManagerProvider);
       // Assuming ClientManager's delete method takes the model or just the ID
       // For this example, let's assume it can find and delete by ID.
-      // The actual delete might be: await genreManager.query().delete().eq('id', genreId).execute();
+      // The actual delete might be: await genreManager.query.delete().eq('id', genreId).execute();
       // Or if you have a specific deleteById:
       final genreToDelete = GenreModel(
         id: genreId,
         name: '',
       ); // Minimal model for delete by ID
-      await genreManager.query().delete(genreToDelete);
+      await genreManager.query.delete(genreToDelete);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

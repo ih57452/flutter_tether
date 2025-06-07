@@ -34,7 +34,7 @@ class ClientManager<TModel extends TetherModel<TModel>> {
     required this.fromSqliteFactory,
   }) : supabase = client.from(tableName);
 
-  ClientManagerQueryBuilder<TModel> query() {
+  ClientManagerQueryBuilder<TModel> get query {
     return ClientManagerQueryBuilder<TModel>(
       tableName: tableName,
       localTableName: localTableName,
@@ -59,7 +59,7 @@ class ClientManager<TModel extends TetherModel<TModel>> {
     );
   }
 
-  RealtimeManager<TModel> realtime({String? schema, String? primaryKey}) {
+  RealtimeManager<TModel> get realtime {
     return RealtimeManager<TModel>(
       supabaseClient: client,
       localDb: localDb,

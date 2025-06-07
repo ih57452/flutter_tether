@@ -26,6 +26,9 @@ generation:
     - 'storage.*'
     - 'supabase_functions.*'
     - 'vault.*'
+    - 'cron.*'
+    - 'supabase_migrations.*'
+    - 'private.*'
 
   # If 'generate_for_all_tables' is false, only tables listed here will have code generated for them.
   # If 'generate_for_all_tables' is true, this list can be used to explicitly include tables that might

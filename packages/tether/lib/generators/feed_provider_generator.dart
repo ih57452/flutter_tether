@@ -97,7 +97,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
 
   ClientManagerFilterBuilder<TModel> _getEffectiveQueryBuilder() {
     // 1. Start with the absolute base query from settings
-    var query = _currentSettings.clientManager.query().select(
+    var query = _currentSettings.clientManager.query.select(
       _currentSettings.selectArgs,
     );
 
@@ -120,7 +120,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
 
   // Helper to get the query structure for feedStream's JSON sub-select
   ClientManagerFilterBuilder<TModel> _getBaseQueryForFeedStreamSchema() {
-    var baseQuery = _currentSettings.clientManager.query().select(
+    var baseQuery = _currentSettings.clientManager.query.select(
       _currentSettings.selectArgs,
     );
     if (_currentSettings.queryCustomizer != null) {

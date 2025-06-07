@@ -1,6 +1,6 @@
 name: flutter_tether
 description: "A command-line tool and builders for generating Supabase-related Dart code."
-version: 1.0.0
+version: 1.0.5
 repository: https://github.com/cspecter/flutter_tether
 
 environment:

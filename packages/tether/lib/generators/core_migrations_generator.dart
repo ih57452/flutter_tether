@@ -28,7 +28,7 @@ CREATE INDEX IF NOT EXISTS idx_feed_items_by_feed_key_and_order ON feed_item_ref
 CREATE TABLE IF NOT EXISTS user_preferences (
     preference_key TEXT PRIMARY KEY NOT NULL,
     preference_value TEXT, -- Stored as JSON string
-    value_type TEXT NOT NULL CHECK(value_type IN ('TEXT', 'INTEGER', 'REAL', 'BOOLEAN', 'TEXT_ARRAY', 'JSON_OBJECT', 'JSON_ARRAY')) -- Type hint for deserialization
+    value_type TEXT NOT NULL CHECK(value_type IN ('text', 'integer', 'number', 'boolean', 'datetime', 'stringList', 'integerArray', 'numberArray', 'jsonObject', 'jsonArray')) -- Type hint for deserialization
 );""",
       """
 CREATE INDEX IF NOT EXISTS idx_user_preferences_key ON user_preferences (preference_key);""",
@@ -78,7 +78,8 @@ END;""",
       config.sqliteMigrationsSubDir,
     );
     const String migrationVersionPadded = "0000";
-    const String coreFeatureName = "core_feed";
+    const String coreFeatureName =
+        "core_features"; // Renamed for clarity as it includes more than just feed
     final String fileName =
         'migration_v${migrationVersionPadded}_$coreFeatureName.dart';
     final String filePath = p.join(outputDir, fileName);
@@ -104,7 +105,7 @@ END;""",
 
     final String dartContent = '''
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// Core Migration: Feed Item References
+// Core Migration: Core Features (Feed, User Preferences, Background Jobs)
 // Migration version: $migrationVersionPadded
 // Generated on $generationDate
 

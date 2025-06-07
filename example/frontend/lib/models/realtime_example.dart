@@ -5,8 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final realtimeProvider = StreamProvider.autoDispose((ref) {
   final genresManager = ref.watch(genresManagerProvider);
 
-  return genresManager
-      .realtime()
+  return genresManager.realtime
       .eq(
         GenresColumn.id,
         'example-genre-id',

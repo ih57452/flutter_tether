@@ -1,4 +1,3 @@
-
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: constant_identifier_names
 
@@ -78,7 +77,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
 
   ClientManagerFilterBuilder<TModel> _getEffectiveQueryBuilder() {
     // 1. Start with the absolute base query from settings
-    var query = _currentSettings.clientManager.query().select(
+    var query = _currentSettings.clientManager.query.select(
       _currentSettings.selectArgs,
     );
 
@@ -101,7 +100,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
 
   // Helper to get the query structure for feedStream's JSON sub-select
   ClientManagerFilterBuilder<TModel> _getBaseQueryForFeedStreamSchema() {
-    var baseQuery = _currentSettings.clientManager.query().select(
+    var baseQuery = _currentSettings.clientManager.query.select(
       _currentSettings.selectArgs,
     );
     if (_currentSettings.queryCustomizer != null) {
@@ -142,8 +141,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
     // Use the base query (with static customizer) for determining table name and selector for SQL
     final baseQueryForSchema = _getBaseQueryForFeedStreamSchema();
     final modelTableName = baseQueryForSchema.tableName;
-    final SelectBuilderBase? selector =
-        baseQueryForSchema.selectorStatement;
+    final SelectBuilderBase? selector = baseQueryForSchema.selectorStatement;
 
     if (selector == null) {
       _logger.severe(
@@ -420,8 +418,3 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
     }
   }
 }
-
-
-
-
-

@@ -79,7 +79,7 @@ final booksManager = ref.watch(booksManagerProvider);
 
 // Perform a full-text search
 final searchResults = await booksManager
-    .query()
+    .query
     .select(
         BookSelectBuilder().select()
         )
@@ -90,7 +90,7 @@ final searchResults = await booksManager
 
 // You can also combine full-text search with other filters
 final filteredResults = await booksManager
-    .query()
+    .query
     .select(BookSelectBuilder().select())
     .textSearch(
         BooksColumn.tsvector,

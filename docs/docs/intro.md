@@ -224,7 +224,7 @@ Managers provide a layer for CRUD operations with caching and synchronization:
 ```dart
 final bookManager = ref.watch(bookManagerProvider);
 
-final books = await bookManager.query()
+final books = await bookManager.query
   .select(bookSelect)
   .eq(BookColumns.published, true)
   .order(BookColumns.createdAt, ascending: false)

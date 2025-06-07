@@ -78,10 +78,10 @@ Some examples of how to use the Manager API:
 final booksManager = ref.watch(booksManagerProvider);
 
 // Fetch all books
-final books = await booksManager.query().select(BooksSelectBuilder().select());
+final books = await booksManager.query.select(BooksSelectBuilder().select());
 
 // Fetch a single book by ID
-final book = await booksManager.query().select(BooksSelectBuilder().select())
+final book = await booksManager.query.select(BooksSelectBuilder().select())
     .eq(BooksColumn.id, 'some-book-id')
     .limit(1);
 
@@ -92,7 +92,7 @@ final newBook = BookModel(
   authorId: 'author-id',
   // other fields...
 );
-final insertedBook = await booksManager.query().insert([newBook]);
+final insertedBook = await booksManager.query.insert([newBook]);
 
 // Update a book
 final updatedBook = BookModel(
@@ -100,11 +100,11 @@ final updatedBook = BookModel(
   title: 'Updated Book Title',
   // other fields...
 ); // You will typically want to pass in a mutated version of the whole model, not just the fields you want to update.
-final updatedBooks = await booksManager.query().update([updatedBook])
+final updatedBooks = await booksManager.query.update([updatedBook])
     .eq(BooksColumn.id, 'some-book-id');
 
 // Delete a book
-final deletedBooks = await booksManager.query().delete()
+final deletedBooks = await booksManager.query.delete()
     .eq(BooksColumn.id, 'some-book-id');
 ```
 
@@ -125,7 +125,7 @@ in options to the manager, such as listening to a specific item based on id.
 final bookProvider = StreamProvider.autoDispose.family<List<BookModel>, String>((ref, bookId) {
   final booksManager = ref.watch(booksManagerProvider);
   // Fetch a single book by ID and listen for changes
-  return booksManager.query().select(BooksSelectBuilder().select())
+  return booksManager.query.select(BooksSelectBuilder().select())
       .eq(BooksColumn.id, bookId)
       .limit(1)
       .onStream();
@@ -172,7 +172,7 @@ Note: All remote queries will automatically cache the data locally.
 final booksManager = ref.watch(booksManagerProvider);
 
 // Fetch all books from the remote database only - useful if you are refreshing data you are watching via a Stream.
-final remoteBooks = await booksManager.query()
+final remoteBooks = await booksManager.query
     .select(BooksSelectBuilder().select())
     .remoteOnly();
 ```
@@ -188,7 +188,7 @@ items in the query.
 final booksManager = ref.watch(booksManagerProvider);
 
 // Fetch all books with their authors
-final booksWithAuthors = await booksManager.query()
+final booksWithAuthors = await booksManager.query
     .select(
         BooksSelectBuilder().select()
         .withAuthor(
@@ -205,7 +205,7 @@ want to fetch all books by a specific author, you can do it like this:
 final booksManager = ref.watch(booksManagerProvider);
 
 // Fetch all books by a specific author
-final booksByAuthor = await booksManager.query()
+final booksByAuthor = await booksManager.query
     .select(BooksSelectBuilder().select())
     .withAuthor(
         AuthorsSelectBuilder().select()
@@ -250,13 +250,13 @@ final booksManager = ref.watch(booksManagerProvider);
 
 // Listen to changes in the books table
 final booksStream = booksManager
-    .realtime() // Call the realtime method
+    .realtime // Call the realtime method
     .eq(BooksColumn.id, 'some-book-id') // Add all the filters and transforms next
     .listen(); // Call .listen() to stream
 
 // Using an in filter
 final booksStream = booksManager
-    .realtime()
+    .realtime
     .inFilter(BooksColumn.id, ['book-id-1', 'book-id-2'])
     .listen();
 ```

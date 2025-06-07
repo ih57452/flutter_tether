@@ -30,27 +30,77 @@ import 'package:sqlite_async/sqlite_async.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database.dart'; // Assuming database.dart is at the root of outputDirectory
 
-/// Defines the valid string constants for user preference types stored in the database.
-class UserPreferenceValueTypes {
-  static const String text = 'TEXT';
-  static const String integer = 'INTEGER';
-  static const String real = 'REAL';
-  static const String boolean = 'BOOLEAN';
-  static const String textArray = 'TEXT_ARRAY';
-  static const String jsonObject = 'JSON_OBJECT';
-  static const String jsonArray = 'JSON_ARRAY';
-
-  /// A list of all valid preference type strings.
-  static List<String> get all => [
-    text,
-    integer,
-    real,
-    boolean,
-    textArray,
-    jsonObject,
-    jsonArray,
-  ];
+/// Defines the valid types for user preferences.
+enum UserPreferenceValueType {
+  text,
+  integer,
+  number,
+  boolean,
+  datetime,
+  stringList,
+  integerArray,
+  numberArray,
+  jsonObject,
+  jsonArray,
 }
+
+/// Utility to convert UserPreferenceValueType enum to its string representation for storage.
+String userPreferenceValueTypeToString(UserPreferenceValueType type) {
+  switch (type) {
+    case UserPreferenceValueType.text:
+      return 'text';
+    case UserPreferenceValueType.integer:
+      return 'integer';
+    case UserPreferenceValueType.number:
+      return 'number';
+    case UserPreferenceValueType.boolean:
+      return 'boolean';
+    case UserPreferenceValueType.datetime:
+      return 'datetime';
+    case UserPreferenceValueType.stringList:
+      return 'stringList';
+    case UserPreferenceValueType.integerArray:
+      return 'integerArray';
+    case UserPreferenceValueType.numberArray:
+      return 'numberArray';
+    case UserPreferenceValueType.jsonObject:
+      return 'jsonObject';
+    case UserPreferenceValueType.jsonArray:
+      return 'jsonArray';
+  }
+}
+
+/// Utility to convert a string representation from storage back to UserPreferenceValueType enum.
+UserPreferenceValueType? userPreferenceValueTypeFromString(String? typeString) {
+  if (typeString == null) return null;
+  switch (typeString) {
+    case 'text':
+      return UserPreferenceValueType.text;
+    case 'integer':
+      return UserPreferenceValueType.integer;
+    case 'number':
+      return UserPreferenceValueType.number;
+    case 'boolean':
+      return UserPreferenceValueType.boolean;
+    case 'datetime':
+      return UserPreferenceValueType.datetime;
+    case 'stringList':
+      return UserPreferenceValueType.stringList;
+    case 'integerArray':
+      return UserPreferenceValueType.integerArray;
+    case 'numberArray':
+      return UserPreferenceValueType.numberArray;
+    case 'jsonObject':
+      return UserPreferenceValueType.jsonObject;
+    case 'jsonArray':
+      return UserPreferenceValueType.jsonArray;
+    default:
+      // Optionally, log or throw an error for unknown types
+      print('Warning: Unknown UserPreferenceValueType string: \$typeString');
+      return null;
+  }
+}
+
 
 /// Manages storing, retrieving, and streaming user preferences from the SQLite database.
 class UserPreferencesManager {
@@ -62,24 +112,21 @@ class UserPreferencesManager {
   /// Sets or updates a user preference.
   /// [key]: The unique key for the preference.
   /// [value]: The value to store. It will be JSON encoded.
-  /// [valueType]: The type of the value, must be one of [UserPreferenceValueTypes].
+  /// [valueType]: The type of the value, used as a hint for deserialization.
   Future<void> setPreference<T>(
     String key,
     T value, {
-    required String valueType,
+    required UserPreferenceValueType valueType,
   }) async {
-    assert(
-      UserPreferenceValueTypes.all.contains(valueType),
-      "Invalid valueType: \$valueType. Must be one of UserPreferenceValueTypes.all",
-    );
     final String jsonValue = jsonEncode(value);
+    final String valueTypeString = userPreferenceValueTypeToString(valueType);
     await db.execute(
       '''INSERT INTO \$_tableName (preference_key, preference_value, value_type)
          VALUES (?, ?, ?)
          ON CONFLICT(preference_key) DO UPDATE SET
            preference_value = excluded.preference_value,
            value_type = excluded.value_type;''',
-      [key, jsonValue, valueType],
+      [key, jsonValue, valueTypeString],
     );
   }
 
@@ -100,8 +147,10 @@ class UserPreferencesManager {
     final rawValue = row['preference_value'] as String?;
     if (rawValue == null) {
       try {
+        // Allow fromJson to handle null if it's designed to (e.g. for nullable types)
         return fromJson(null);
       } catch (_) {
+        // If fromJson(null) throws, return null or handle as appropriate
         return null;
       }
     }
@@ -151,10 +200,16 @@ class UserPreferencesManager {
   /// Retrieves the raw preference data (key, JSON value, value_type) as a map.
   /// Returns `null` if the key is not found.
   Future<Map<String, dynamic>?> getRawPreference(String key) async {
-    return db.get(
+    final row = await db.get(
       'SELECT preference_key, preference_value, value_type FROM \$_tableName WHERE preference_key = ?',
       [key],
     );
+    if (row == null) return null;
+    return {
+      'preference_key': row['preference_key'],
+      'preference_value': row['preference_value'],
+      'value_type': row['value_type'],
+    };
   }
 
   /// Watches for changes to a specific user preference and streams its raw data as a map.
@@ -185,7 +240,7 @@ class UserPreferencesManager {
   /// [defaultSettings]: A map where keys are preference keys and values are records
   /// containing the default `value` and `valueType`.
   Future<void> ensureDefaultPreferences(
-    Map<String, ({Object value, String valueType})> defaultSettings,
+    Map<String, ({Object value, UserPreferenceValueType valueType})> defaultSettings,
   ) async {
     for (final entry in defaultSettings.entries) {
       final key = entry.key;
@@ -195,8 +250,6 @@ class UserPreferencesManager {
       final existing = await getRawPreference(key);
       if (existing == null) {
         // Key does not exist, set the default
-        // Using <dynamic> for T in setPreference as defaultValue is Object.
-        // jsonEncode within setPreference will handle various types.
         await setPreference<dynamic>(key, defaultValue, valueType: valueType);
         print('Set default preference for key "\$key"');
       }
