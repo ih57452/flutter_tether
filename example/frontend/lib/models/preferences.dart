@@ -1,3 +1,5 @@
+import 'package:example/database/managers/user_preferences_manager.g.dart';
+
 enum ExamplePreferences {
   textValue("textValue", "Text Value"),
   boolean("boolean", "Boolean"),
@@ -21,24 +23,34 @@ enum ExamplePreferences {
   ];
 }
 
-final Map<String, ({Object value, String valueType})> defaultAppSettings = {
+final Map<String, ({Object value, UserPreferenceValueType valueType})>
+defaultAppSettings = {
   ExamplePreferences.textValue.value: (
     value: 'Default Text Value',
-    valueType: 'text',
+    valueType: UserPreferenceValueType.text,
   ),
-  ExamplePreferences.boolean.value: (value: true, valueType: 'boolean'),
-  ExamplePreferences.integer.value: (value: 42, valueType: 'integer'),
+  ExamplePreferences.boolean.value: (
+    value: true,
+    valueType: UserPreferenceValueType.boolean,
+  ),
+  ExamplePreferences.integer.value: (
+    value: 42,
+    valueType: UserPreferenceValueType.integer,
+  ),
   ExamplePreferences.textArray.value: (
     value: ['Item1', 'Item2'],
-    valueType: 'textArray',
+    valueType: UserPreferenceValueType.stringList,
   ),
-  ExamplePreferences.real.value: (value: 3.14, valueType: 'real'),
+  ExamplePreferences.real.value: (
+    value: 3.14,
+    valueType: UserPreferenceValueType.number,
+  ),
   ExamplePreferences.jsonObject.value: (
     value: {'key': 'value'},
-    valueType: 'jsonObject',
+    valueType: UserPreferenceValueType.jsonObject,
   ),
   ExamplePreferences.jsonArray.value: (
     value: ['item1', 'item2'],
-    valueType: 'jsonArray',
+    valueType: UserPreferenceValueType.jsonArray,
   ),
 };

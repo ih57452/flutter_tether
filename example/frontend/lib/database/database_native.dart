@@ -11,6 +11,7 @@ import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 import './database_interface.dart';
 
 // Import generated migration SQL strings
+import 'sqlite_migrations/migration_v0000_core_features.dart' as mig_v0000_coreFeatures;
 import 'sqlite_migrations/migration_v0000_core_feed.dart' as mig_v0000_coreFeed;
 import 'sqlite_migrations/migration_v0001.dart' as mig_v0001;
 
@@ -40,6 +41,12 @@ class NativeSqliteDb implements AppDatabase {
 
     // --- Migration Setup ---
     final migrations = SqliteMigrations();
+    migrations.add(SqliteMigration(1, (tx) async {
+      for (final statement in mig_v0000_coreFeatures.migrationSqlStatementsV0000_core_features) {
+        if (statement.trim().startsWith("--")) continue; // Skip comments
+        await tx.execute(statement);
+      }
+    }));
     migrations.add(SqliteMigration(1, (tx) async {
       for (final statement in mig_v0000_coreFeed.migrationSqlStatementsV0000_core_feed) {
         if (statement.trim().startsWith("--")) continue; // Skip comments

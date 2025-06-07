@@ -120,7 +120,7 @@ class PreferencesTab extends ConsumerWidget {
                       .setPreference<String>(
                         ExamplePreferences.textValue.name,
                         newValue,
-                        valueType: UserPreferenceValueTypes.text,
+                        valueType: UserPreferenceValueType.text,
                       );
                 },
                 onChanged:
@@ -129,7 +129,7 @@ class PreferencesTab extends ConsumerWidget {
                         .setPreference<String>(
                           ExamplePreferences.textValue.name,
                           value,
-                          valueType: UserPreferenceValueTypes.text,
+                          valueType: UserPreferenceValueType.text,
                         ),
               ),
               const SizedBox(height: 8),
@@ -153,7 +153,7 @@ class PreferencesTab extends ConsumerWidget {
                           .setPreference<bool>(
                             ExamplePreferences.boolean.name,
                             newValue,
-                            valueType: UserPreferenceValueTypes.boolean,
+                            valueType: UserPreferenceValueType.boolean,
                           );
                     },
                   ),
@@ -185,7 +185,7 @@ class PreferencesTab extends ConsumerWidget {
                       .setPreference<int>(
                         ExamplePreferences.integer.name,
                         newValue.toInt(),
-                        valueType: UserPreferenceValueTypes.integer,
+                        valueType: UserPreferenceValueType.integer,
                       );
                 },
               ),
@@ -222,7 +222,7 @@ class PreferencesTab extends ConsumerWidget {
                       .setPreference<List<String>>(
                         ExamplePreferences.textArray.name,
                         newArray,
-                        valueType: UserPreferenceValueTypes.textArray,
+                        valueType: UserPreferenceValueType.stringList,
                       );
                 },
               ),
@@ -253,7 +253,7 @@ class PreferencesTab extends ConsumerWidget {
                       .setPreference<double>(
                         ExamplePreferences.real.name,
                         newValue,
-                        valueType: UserPreferenceValueTypes.real,
+                        valueType: UserPreferenceValueType.number,
                       );
                 },
               ),
@@ -289,7 +289,7 @@ class PreferencesTab extends ConsumerWidget {
                       .setPreference<Map<String, dynamic>>(
                         ExamplePreferences.jsonObject.name,
                         newJson,
-                        valueType: UserPreferenceValueTypes.jsonObject,
+                        valueType: UserPreferenceValueType.jsonObject,
                       );
                 },
               ),
@@ -325,7 +325,7 @@ class PreferencesTab extends ConsumerWidget {
                       .setPreference<List<dynamic>>(
                         ExamplePreferences.jsonArray.name,
                         newJson,
-                        valueType: UserPreferenceValueTypes.jsonArray,
+                        valueType: UserPreferenceValueType.jsonArray,
                       );
                 },
               ),
