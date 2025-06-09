@@ -167,7 +167,9 @@ class BookModel extends TetherModel<BookModel> {
 
   /// Creates a copy of this instance with potentially modified fields.
   @override
-  BookModel copyWith
+  BookModel copyWith({...}) {
+    ...
+  }
 
   @override
   String toString() {
@@ -180,10 +182,68 @@ Factories are provided to connect and translate the data from Supabase and
 SQLite to the model. These are consumed by the Managers and you typically will
 not need to interact with them directly.
 
+## Working with Manager Results
+
+When using Tether managers, all operations return a `TetherClientReturn<TModel>`
+object:
+
+```dart
+// Get books with count information
+final result = await bookManager.query
+  .select(bookSelect)
+  .eq(BooksColumn.published, true)
+  .limit(10);
+
+// Access the data
+final books = result.data; // List<BookModel>
+final totalCount = result.count; // int? - total matching records
+final hasError = result.hasError; // bool
+
+// Handle potential errors
+if (result.hasError) {
+  print('Error: ${result.error}');
+  return;
+}
+
+// Get a single book
+try {
+  final book = result.single; // Throws if no data
+  print('First book: ${book.title}');
+} catch (e) {
+  print('No books found');
+}
+```
+
+## Streaming Results
+
+Streams also return `TetherClientReturn<TModel>` objects:
+
+```dart
+final booksStream = bookManager.query
+  .select(bookSelect)
+  .eq(BooksColumn.published, true)
+  .asStream();
+
+booksStream.listen((result) {
+  if (result.hasError) {
+    print('Stream error: ${result.error}');
+    return;
+  }
+  
+  final books = result.data;
+  final count = result.count;
+  print('Loaded ${books.length} books, total available: $count');
+});
+```
+
 ## Things to Note
 
 - Typical SQL snake case conventions are translated to camel case in Dart. For
   example, `created_at` becomes `createdAt`.
+- All manager operations return `TetherClientReturn<TModel>` which includes both
+  data and metadata like count.
+- The `count` field provides the total number of records matching your query,
+  useful for pagination.
 
 ### Relationships
 

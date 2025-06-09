@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // For User
-import '../managers/auth_manager.g.dart';
+import 'package:tether_libs/auth_manager/auth_manager.dart';
 import '../models.g.dart';
 import '../supabase_schema.dart';
 

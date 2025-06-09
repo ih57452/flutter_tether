@@ -6,10 +6,13 @@ import 'package:example/database/supabase_select_builders.g.dart';
 import 'package:example/models/selects.dart';
 import 'package:example/database/managers/books_client_manager.g.dart';
 import 'package:example/database/managers/genres_client_manager.g.dart';
+import 'package:tether_libs/client_manager/manager/client_manager_base.dart';
 import 'package:tether_libs/client_manager/manager/client_manager_filter_builder.dart';
 
 // Provider to fetch all genres
-final allGenresProvider = FutureProvider<List<GenreModel>>((ref) async {
+final allGenresProvider = FutureProvider<TetherClientReturn<GenreModel>>((
+  ref,
+) async {
   final genresManager = ref.watch(genresManagerProvider);
   // Assuming a method like getAll() or query().getAll() exists
   // For this example, let's assume it fetches all genres without specific filters.
@@ -137,7 +140,7 @@ class _FeedTabState extends ConsumerState<FeedTab> {
         // Genre Filter Section
         genresAsyncValue.when(
           data: (genres) {
-            if (genres.isEmpty) return const SizedBox.shrink();
+            if (genres.data.isEmpty) return const SizedBox.shrink();
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: Wrap(
@@ -150,7 +153,7 @@ class _FeedTabState extends ConsumerState<FeedTab> {
                     onSelected:
                         (_) => _updateSelectedGenre(null), // Use new method
                   ),
-                  ...genres.map((genre) {
+                  ...genres.data.map((genre) {
                     return ChoiceChip(
                       label: Text(genre.name),
                       selected: currentSelectedGenreId == genre.id,

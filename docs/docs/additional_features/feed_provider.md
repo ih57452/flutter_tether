@@ -8,7 +8,9 @@ Tether includes an optional, powerful Feed Management System designed to
 simplify the creation and management of paginated content feeds within your
 Flutter application. This system leverages a Tether-managed local SQLite table
 (`feed_item_references`) to store the order and references of feed items,
-combined with a Riverpod `StreamNotifier` for reactive UI updates.
+combined with a Riverpod `StreamNotifier` for reactive UI updates. The system
+now includes intelligent count tracking to prevent unnecessary API calls and
+provide better pagination controls.
 
 Note: This feature requires `Riverpod` to work.
 
@@ -54,19 +56,35 @@ At the heart of the feed system are two main classes:
    - A `FamilyStreamNotifier` (from Riverpod) that manages the state of a feed
      based on the provided `FeedStreamNotifierSettings`.
    - It handles:
-     - Fetching initial data.
-     - Fetching subsequent pages (pagination).
+     - Fetching initial data with count tracking.
+     - Fetching subsequent pages (pagination) only when more items are
+       available.
      - Applying search terms (if configured).
      - Applying dynamic filters.
      - Storing item references and their order in the local
        `feed_item_references` table.
      - Streaming the ordered list of `TModel` items to the UI.
+     - Tracking total remote count to prevent unnecessary API calls.
 
-The system works by first fetching item IDs (and potentially other minimal data)
-from your Supabase backend based on the configuration. These references are
-stored locally. The `FeedStreamNotifier` then watches this local table and
-fetches the full model data (using the `selectArgs`) for the referenced items,
-providing a reactive stream of `List<TModel>`.
+The system works by first fetching item data from your Supabase backend based on
+the configuration. The `TetherClientReturn<TModel>` response includes both the
+data and the total count of matching records. These references are stored
+locally, and the count is tracked to enable intelligent pagination. The
+`FeedStreamNotifier` then watches this local table and provides a reactive
+stream of `List<TModel>`.
+
+## Count Tracking and Pagination
+
+The feed system now includes intelligent count tracking:
+
+- **Total Count**: The `totalRemoteCount` tracks the total number of items
+  available from the remote source
+- **Smart Pagination**: The `fetchMoreItems()` method only makes API calls when
+  more items are actually available
+- **Efficient Loading**: Prevents unnecessary network requests when all items
+  have been loaded
+- **UI Integration**: Exposes `hasMoreItems` property for controlling load more
+  buttons and pagination UI
 
 ## Setting up a Regular Feed
 
@@ -114,9 +132,10 @@ final bookFeedProvider = Provider<FeedStreamNotifierSettings<BookModel>>((ref) {
 });
 ```
 
-### 2. Use in a Widget
+### 2. Use in a Widget with Count Tracking
 
-Consume the provider in your widget to display the feed and handle interactions.
+Consume the provider in your widget to display the feed and handle interactions
+with intelligent pagination.
 
 ```dart
 class FeedTab extends ConsumerStatefulWidget {
@@ -133,14 +152,26 @@ class _FeedTabState extends ConsumerState<FeedTab> {
     _scrollController.addListener(_scrollListener);
   }
 
-  // ... dispose, _scrollListener ...
+  void _scrollListener() {
+    if (_scrollController.position.pixels >= 
+        _scrollController.position.maxScrollExtent - 200) {
+      _fetchMore();
+    }
+  }
 
   Future<void> _fetchMore() async {
     if (_isFetchingMore) return;
-    setState(() => _isFetchingMore = true);
-
-    final settings = ref.read(bookFeedProvider); // Get current settings
+    
+    final settings = ref.read(bookFeedProvider);
     final notifier = ref.read(booksFeedProvider(settings).notifier);
+    
+    // Check if there are more items before attempting to fetch
+    if (!notifier.hasMoreItems) {
+      print('No more items to load');
+      return;
+    }
+
+    setState(() => _isFetchingMore = true);
     await notifier.fetchMoreItems();
 
     if (mounted) {
@@ -159,10 +190,61 @@ class _FeedTabState extends ConsumerState<FeedTab> {
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(bookFeedProvider); // Watch for settings changes
-    final booksAsyncValue = ref.watch(booksFeedProvider(settings)); // Watch the feed data, rebuilds feed on settings change
+    final booksAsyncValue = ref.watch(booksFeedProvider(settings)); // Watch the feed data
+    final notifier = ref.read(booksFeedProvider(settings).notifier);
 
-    // ... UI rendering using booksAsyncValue, genre selection chips ...
-    // ListView.builder uses _scrollController
+    return booksAsyncValue.when(
+      data: (books) => Column(
+        children: [
+          // Count information display
+          if (notifier.totalRemoteCount != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Showing ${books.length} of ${notifier.totalRemoteCount} books',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+          
+          // Genre selection chips
+          // ... genre selection UI ...
+          
+          // Books list
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: books.length + (notifier.hasMoreItems ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == books.length) {
+                  // Load more indicator - only shown if more items available
+                  return _isFetchingMore
+                      ? const Center(child: CircularProgressIndicator())
+                      : TextButton(
+                          onPressed: _fetchMore,
+                          child: const Text('Load More'),
+                        );
+                }
+                
+                final book = books[index];
+                return ListTile(
+                  title: Text(book.title),
+                  subtitle: Text(book.author?.name ?? 'Unknown Author'),
+                  // ... other book details
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }
 ```
@@ -170,7 +252,7 @@ class _FeedTabState extends ConsumerState<FeedTab> {
 ## Setting up a Search Feed
 
 A search feed allows users to input search terms, typically for full-text
-search. This assume that full-text search is already set up in your Supabase
+search. This assumes that full-text search is already set up in your Supabase
 database. When set up properly full-text search is fast and can provide near
 real-time results.
 
@@ -183,7 +265,7 @@ final bookSearchSettingsProvider = Provider<FeedStreamNotifierSettings<BookModel
   final bookClientManager = ref.watch(booksManagerProvider);
   return FeedStreamNotifierSettings<BookModel>(
     feedKey: 'books_search_feed', // Unique key for this search feed
-    searchColumn: BooksColumn.tsvector, // The tsvector column for FTS, you manually have to pass this in.
+    searchColumn: BooksColumn.tsvector, // The tsvector column for FTS
     clientManager: bookClientManager,
     selectArgs: bookSelect, // Your predefined SupabaseSelectBuilderBase instance
     fromJsonFactory: BookModel.fromJson,
@@ -193,9 +275,10 @@ final bookSearchSettingsProvider = Provider<FeedStreamNotifierSettings<BookModel
 });
 ```
 
-### 2. Use in a Widget
+### 2. Use in a Widget with Search and Count Tracking
 
-Consume the provider and use the notifier's `search()` method.
+Consume the provider and use the notifier's `search()` method with intelligent
+pagination.
 
 ```dart
 class SearchFeedTab extends ConsumerStatefulWidget {
@@ -205,14 +288,33 @@ class SearchFeedTab extends ConsumerStatefulWidget {
 class _SearchFeedTabState extends ConsumerState<SearchFeedTab> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  // ... _searchTerm, _isFetchingMore, initState, dispose, _scrollListener ...
+  bool _isFetchingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels >= 
+        _scrollController.position.maxScrollExtent - 200) {
+      _fetchMore();
+    }
+  }
 
   Future<void> _fetchMore() async {
     if (_isFetchingMore) return;
-    setState(() => _isFetchingMore = true);
 
-    final settings = ref.read(bookSearchSettingsProvider); // Get current settings
+    final settings = ref.read(bookSearchSettingsProvider);
     final notifier = ref.read(booksFeedProvider(settings).notifier);
+    
+    // Check if there are more items before attempting to fetch
+    if (!notifier.hasMoreItems) {
+      return;
+    }
+
+    setState(() => _isFetchingMore = true);
     await notifier.fetchMoreItems();
 
     if (mounted) {
@@ -222,18 +324,92 @@ class _SearchFeedTabState extends ConsumerState<SearchFeedTab> {
 
   void _performSearch() {
     final searchTerm = _searchController.text;
-    final settings = ref.read(bookSearchSettingsProvider); // Get current settings
+    final settings = ref.read(bookSearchSettingsProvider);
     final notifier = ref.read(booksFeedProvider(settings).notifier);
     notifier.search(searchTerm);
   }
 
   @override
   Widget build(BuildContext context) {
-    final settings = ref.watch(bookSearchSettingsProvider); // Watch for settings changes (if any)
-    final asyncValue = ref.watch(booksFeedProvider(settings)); // Watch the feed data
+    final settings = ref.watch(bookSearchSettingsProvider);
+    final asyncValue = ref.watch(booksFeedProvider(settings));
+    final notifier = ref.read(booksFeedProvider(settings).notifier);
 
-    // ... UI rendering with TextField for search input, ListView for results ...
-    // ListView.builder uses _scrollController
+    return Column(
+      children: [
+        // Search input
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Search books...',
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: _performSearch,
+              ),
+            ),
+            onSubmitted: (_) => _performSearch(),
+          ),
+        ),
+        
+        // Results
+        Expanded(
+          child: asyncValue.when(
+            data: (books) => Column(
+              children: [
+                // Search results count
+                if (notifier.totalRemoteCount != null)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      '${notifier.totalRemoteCount} results found',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                
+                // Results list
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: books.length + (notifier.hasMoreItems ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == books.length) {
+                        // Load more indicator
+                        return _isFetchingMore
+                            ? const Center(child: CircularProgressIndicator())
+                            : notifier.hasMoreItems
+                                ? TextButton(
+                                    onPressed: _fetchMore,
+                                    child: const Text('Load More Results'),
+                                  )
+                                : const SizedBox.shrink();
+                      }
+                      
+                      final book = books[index];
+                      return ListTile(
+                        title: Text(book.title),
+                        subtitle: Text(book.author?.name ?? 'Unknown Author'),
+                        // ... other book details
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(child: Text('Error: $error')),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 }
 ```
@@ -244,20 +420,25 @@ class _SearchFeedTabState extends ConsumerState<SearchFeedTab> {
   the `feed_key`, the source table of the item, the item's ID, and its display
   order. This allows for persistent, ordered feeds. The actual item data is
   fetched based on these references and also benefits from the `ClientManager`'s
-  local caching of individual models. Note, this is fully managed in the
-  background and you don't have to interact with it.
-  - **`feedKey` Importance**: Ensure each distinct feed in your application uses
-    a unique `feedKey`. This prevents data from different feeds from mixing in
-    the local `feed_item_references` table.
+  local caching of individual models.
+- **Intelligent Count Tracking**: The system tracks the total number of
+  available items and prevents unnecessary API calls when all items have been
+  loaded.
+- **Smart Pagination**: The `fetchMoreItems()` method only makes API calls when
+  more items are actually available, improving performance and user experience.
+- **Count Information Access**: Use `notifier.totalRemoteCount` to get the total
+  count and `notifier.hasMoreItems` to check if more items are available.
+- **`feedKey` Importance**: Ensure each distinct feed in your application uses a
+  unique `feedKey`. This prevents data from different feeds from mixing in the
+  local `feed_item_references` table.
 - **Riverpod Integration**: Designed for seamless use with Riverpod, leveraging
   `FamilyStreamNotifier` for state management and reactivity.
-- **Pagination**: The `fetchMoreItems()` method on the notifier handles loading
-  subsequent pages.
 - **Query Customization**:
   - `queryCustomizer` in `FeedStreamNotifierSettings` allows defining a base set
     of filters for a feed.
 - **Search**: The `search(String terms)` method on the notifier triggers a new
-  fetch based on the search terms against the configured `searchColumn`.
+  fetch based on the search terms against the configured `searchColumn`. Count
+  tracking is reset when search terms change.
 - **Reactivity**: Feeds automatically update if the underlying
   `FeedStreamNotifierSettings` change (when the provider for settings is
   re-evaluated) or when methods like `search`, `refreshFeed`, or
@@ -269,3 +450,15 @@ class _SearchFeedTabState extends ConsumerState<SearchFeedTab> {
   the widget is unmounted, preventing errors.
 - **Error Handling**: The `AsyncValue` provided by Riverpod
   (`asyncValue.when(...)`) should be used to handle loading and error states.
+
+## Count Tracking Best Practices
+
+1. **Use Count Information**: Display the total count to users when available
+   for better UX
+2. **Conditional Load More**: Only show "Load More" buttons when `hasMoreItems`
+   is true
+3. **Progress Indicators**: Use count information to show loading progress
+4. **Search Results**: Display search result counts to help users understand the
+   scope of results
+5. **Performance**: The system prevents unnecessary API calls, but you should
+   still debounce search input for the best user experience

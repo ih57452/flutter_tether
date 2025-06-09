@@ -1,6 +1,7 @@
 import 'package:example/database/supabase_select_builders.g.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tether_libs/client_manager/manager/client_manager_base.dart';
 import 'package:tether_libs/utils/string_utils.dart';
 import 'package:uuid/uuid.dart'; // For generating IDs
 
@@ -10,11 +11,12 @@ import 'package:example/database/managers/genres_client_manager.g.dart'; // Cont
 import 'package:example/models/selects.dart'; // Contains genreSelect for fetching
 
 // Provider for a list of genres to display
-final genresListProvider = StreamProvider.autoDispose<List<GenreModel>>((ref) {
-  final genreManager = ref.watch(genresManagerProvider);
-  // Fetch genres using the predefined 'genreSelect' for consistency
-  return genreManager.query.select(genreSelect).asStream();
-});
+final genresListProvider =
+    StreamProvider.autoDispose<TetherClientReturn<GenreModel>>((ref) {
+      final genreManager = ref.watch(genresManagerProvider);
+      // Fetch genres using the predefined 'genreSelect' for consistency
+      return genreManager.query.select(genreSelect).asStream();
+    });
 
 class CrudTab extends ConsumerStatefulWidget {
   const CrudTab({super.key});
@@ -187,7 +189,7 @@ class _CrudTabState extends ConsumerState<CrudTab> {
           const SizedBox(height: 10),
           genresAsyncValue.when(
             data: (genres) {
-              if (genres.isEmpty) {
+              if (genres.data.isEmpty) {
                 return const Center(
                   child: Text('No genres found. Create one!'),
                 );
@@ -196,9 +198,9 @@ class _CrudTabState extends ConsumerState<CrudTab> {
                 shrinkWrap: true,
                 physics:
                     const NeverScrollableScrollPhysics(), // To use inside SingleChildScrollView
-                itemCount: genres.length,
+                itemCount: genres.data.length,
                 itemBuilder: (context, index) {
-                  final genre = genres[index];
+                  final genre = genres.data[index];
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 4.0),
                     child: ListTile(

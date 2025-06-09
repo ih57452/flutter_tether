@@ -6,7 +6,8 @@ sidebar_position: 4
 
 Tether provides a system for building queries that conform to both Supabase and
 SQLite syntax. This allows you to construct complex queries in a simplified,
-Dart-compliant, and composable manner.
+Dart-compliant, and composable manner. All queries return
+`TetherClientReturn<TModel>` objects that include both data and metadata.
 
 ## Column Enums
 
@@ -74,6 +75,46 @@ final bookSelectSome = BooksSelectBuilder().select([
 
 This is will pass `'id,title,author_id'` into the select method in the Supabase
 API when built, selecting only those columns.
+
+## Using Select Builders with Managers
+
+When using select builders with managers, all operations return
+`TetherClientReturn<TModel>`:
+
+```dart
+final bookManager = ref.watch(bookManagerProvider);
+
+// Query with count information
+final result = await bookManager.query
+  .select(bookSelect)
+  .eq(BooksColumn.published, true)
+  .order(BooksColumn.createdAt, ascending: false)
+  .limit(10);
+
+// Access the results
+final books = result.data; // List<BookModel>
+final totalCount = result.count; // int? - total records matching the query
+final hasError = result.hasError; // bool
+
+print('Loaded ${books.length} books of ${totalCount ?? 'unknown'} total');
+
+// Stream with count information
+final booksStream = bookManager.query
+  .select(bookSelect)
+  .eq(BooksColumn.published, true)
+  .asStream(); // Stream<TetherClientReturn<BookModel>>
+
+booksStream.listen((result) {
+  if (result.hasError) {
+    print('Error: ${result.error}');
+    return;
+  }
+  
+  final books = result.data;
+  final count = result.count;
+  print('Stream update: ${books.length} books, total: $count');
+});
+```
 
 ## Relationships
 
@@ -214,10 +255,14 @@ like this:
 ```dart
 final postsWithLikes = PostsSelectBuilder()
   .select()
-  .withLikes(UsersSelectBuilder().select()innerJoin: true);
+  .withLikes(UsersSelectBuilder().select(), innerJoin: true);
 
-final postsWithLikes = await postsManager.query.select(postsWithLikes)
+final result = await postsManager.query.select(postsWithLikes)
   .eq(LikesColumn.userId, 'some-user-id');
+
+// Access results with count information
+final posts = result.data; // List<PostModel>
+final totalCount = result.count; // int? - total matching posts
 ```
 
 This will pass the following select string to the Supabase API:
@@ -254,3 +299,31 @@ final bookSelect = BooksSelectBuilder()
     .withCoverImage(imageSelect)
     .withBannerImage(imageSelect);
 ```
+
+## Count Information
+
+All manager operations that use select builders return count information when
+available:
+
+```dart
+// Get count with limited results
+final result = await bookManager.query
+  .select(bookSelect)
+  .eq(BooksColumn.published, true)
+  .limit(20);
+
+print('Showing ${result.data.length} of ${result.count} published books');
+
+// Use count for pagination decisions
+final hasMorePages = result.count != null && result.data.length < result.count!;
+if (hasMorePages) {
+  print('More pages available');
+}
+```
+
+This count information is particularly useful for:
+
+- Pagination UI (showing "page X of Y")
+- Load more buttons (only show if more items available)
+- Progress indicators
+- Search result summaries ("X results found")

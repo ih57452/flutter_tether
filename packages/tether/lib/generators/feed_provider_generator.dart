@@ -31,6 +31,7 @@ import 'package:sqlite_async/sqlite3_common.dart';
 import 'package:tether_libs/client_manager/client_manager.dart';
 import 'package:tether_libs/client_manager/manager/client_manager_filter_builder.dart';
 import 'package:tether_libs/client_manager/manager/client_manager_models.dart';
+import 'package:tether_libs/client_manager/manager/client_manager_base.dart'; // Import TetherClientReturn
 import 'package:sqlite_async/sqlite_async.dart'; // Ensure SqliteDatabase is imported
 
 import '../database.dart';
@@ -85,6 +86,9 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
   bool _isDisposed = false;
   final Logger _logger = Logger('SearchStreamNotifier');
 
+  // Track the total count from remote
+  int? _totalRemoteCount;
+
   // For dynamic filters applied on top of queryCustomizer
   ClientManagerFilterBuilder<TModel> Function(
     ClientManagerFilterBuilder<TModel> query,
@@ -129,12 +133,23 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
     return baseQuery;
   }
 
+  /// Calculate how many items we currently have in the feed
+  int get _currentItemCount => currentPage * _currentSettings.pageSize;
+
+  /// Check if there are more items available to fetch
+  bool get _hasMoreItems {
+    if (_totalRemoteCount == null)
+      return true; // Unknown count, assume more available
+    return _currentItemCount < _totalRemoteCount!;
+  }
+
   @override
   Stream<List<TModel>> build(FeedStreamNotifierSettings<TModel> arg) async* {
     _currentSettings = arg;
     currentPage = 0;
     terms = '';
     _dynamicFilterApplicator = null; // Reset dynamic filters
+    _totalRemoteCount = null; // Reset count tracking
     _isDisposed = false;
 
     ref.onDispose(() {
@@ -161,12 +176,11 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
     // Use the base query (with static customizer) for determining table name and selector for SQL
     final baseQueryForSchema = _getBaseQueryForFeedStreamSchema();
     final modelTableName = baseQueryForSchema.tableName;
-    final SelectBuilderBase? selector =
-        baseQueryForSchema.selectorStatement;
+    final SelectBuilderBase? selector = baseQueryForSchema.selectorStatement;
 
     if (selector == null) {
       _logger.severe(
-        "SearchStreamNotifier: selectorStatement is null in feedStream for \${modelTableName}. This indicates a setup error with base query.",
+        "SearchStreamNotifier: selectorStatement is null in feedStream for \$modelTableName. This indicates a setup error with base query.",
       );
       yield <TModel>[];
       return;
@@ -263,14 +277,23 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
         'refreshFeed called. initialize: \$initialize, current terms: "\$terms", dynamicFiltersSet: \${_dynamicFilterApplicator != null}',
       );
 
-      // _fetch will use _getEffectiveQueryBuilder()
-      final items = await _fetch(
+      // _fetch will use _getEffectiveQueryBuilder() and return TetherClientReturn
+      final result = await _fetch(
         rangeStart: 0,
         rangeEnd: _currentSettings.pageSize - 1,
       );
 
       if (_isDisposed) return;
 
+      // Update the total count from the remote response
+      if (result.count != null) {
+        _totalRemoteCount = result.count;
+        _logger.info(
+          'Updated total remote count to: \$_totalRemoteCount for feedKey: \${_currentSettings.feedKey}',
+        );
+      }
+
+      final items = result.data;
       final feedManager = ref.read(feedItemReferenceManagerProvider);
       final feedKey = _currentSettings.feedKey;
       final effectiveQuery = _getEffectiveQueryBuilder(); // To get tableName
@@ -331,14 +354,33 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
   }
 
   Future<void> fetchMoreItems() async {
+    // Check if there are more items to fetch based on the count
+    if (!_hasMoreItems) {
+      _logger.info(
+        'fetchMoreItems: No more items to fetch. Current count: \$_currentItemCount, Total remote count: \$_totalRemoteCount',
+      );
+      return;
+    }
+
     final nextPage = currentPage + 1;
     try {
       final rangeStart = nextPage * _currentSettings.pageSize;
       final rangeEnd = ((nextPage + 1) * _currentSettings.pageSize) - 1;
-      // _fetch will use _getEffectiveQueryBuilder()
-      final newItems = await _fetch(rangeStart: rangeStart, rangeEnd: rangeEnd);
+
+      // _fetch will use _getEffectiveQueryBuilder() and return TetherClientReturn
+      final result = await _fetch(rangeStart: rangeStart, rangeEnd: rangeEnd);
 
       if (_isDisposed) return;
+
+      // Update the total count if provided (it should be consistent)
+      if (result.count != null && result.count != _totalRemoteCount) {
+        _logger.info(
+          'fetchMoreItems: Updated total remote count from \$_totalRemoteCount to \${result.count}',
+        );
+        _totalRemoteCount = result.count;
+      }
+
+      final newItems = result.data;
 
       if (newItems.isNotEmpty) {
         final feedManager = ref.read(feedItemReferenceManagerProvider);
@@ -361,6 +403,10 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
         );
         if (_isDisposed) return;
         currentPage = nextPage;
+
+        _logger.info(
+          'fetchMoreItems: Added \${newItems.length} items. Current page: \$currentPage, Total remote count: \$_totalRemoteCount',
+        );
       }
     } catch (e, s) {
       if (!_isDisposed) {
@@ -373,9 +419,13 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
     }
   }
 
-  Future<List<TModel>> _fetch({int rangeStart = 0, int rangeEnd = 20}) async {
+  Future<TetherClientReturn<TModel>> _fetch({
+    int rangeStart = 0,
+    int rangeEnd = 20,
+  }) async {
     final effectiveQuery = _getEffectiveQueryBuilder();
     // The textSearch is now part of _getEffectiveQueryBuilder if terms are set
+    // Now returns TetherClientReturn<TModel> instead of List<TModel>
     return await effectiveQuery.range(rangeStart, rangeEnd).remoteOnly();
   }
 
@@ -398,6 +448,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
 
     terms = newTerms;
     currentPage = 0;
+    _totalRemoteCount = null; // Reset count when searching
     await refreshFeed(initialize: true);
   }
 
@@ -415,6 +466,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
     );
     _dynamicFilterApplicator = filterApplicator;
     currentPage = 0;
+    _totalRemoteCount = null; // Reset count when filters change
     // It's usually best to re-initialize the feed when filters change significantly.
     // Also, consider if search terms should be cleared or maintained.
     // For now, maintaining search terms.
@@ -430,6 +482,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
       );
       _dynamicFilterApplicator = null;
       currentPage = 0;
+      _totalRemoteCount = null; // Reset count when filters change
       // Also consider if search terms should be cleared.
       await refreshFeed(initialize: true);
     } else {
@@ -438,6 +491,12 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
       );
     }
   }
+
+  /// Getter to expose the current total count for UI components
+  int? get totalRemoteCount => _totalRemoteCount;
+
+  /// Getter to expose whether more items are available for UI components
+  bool get hasMoreItems => _hasMoreItems;
 }
 
 

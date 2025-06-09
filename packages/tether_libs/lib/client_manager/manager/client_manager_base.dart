@@ -6,11 +6,28 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tether_libs/models/supabase_select_builder_base.dart';
 import 'package:tether_libs/models/tether_model.dart';
 import 'package:tether_libs/models/table_info.dart';
-import 'package:tether_libs/utils/string_utils.dart';
 import 'client_manager_models.dart';
 
+class TetherClientReturn<TModel extends TetherModel<TModel>> {
+  final List<TModel> data;
+  final String? error;
+  final int? count;
+
+  TModel get single =>
+      data.isNotEmpty ? data.first : throw StateError('No data available');
+
+  TetherClientReturn({required this.data, this.error, this.count});
+
+  bool get hasError => error != null && error!.isNotEmpty;
+
+  @override
+  String toString() {
+    return 'TetherClientReturn(data: $data, error: $error, count: $count)';
+  }
+}
+
 class ClientManagerBase<TModel extends TetherModel<TModel>>
-    implements Future<List<TModel>> {
+    implements Future<TetherClientReturn<TModel>> {
   final String tableName; // Simple table name, e.g., "books"
   final String localTableName;
   final SqliteDatabase localDb;
@@ -212,7 +229,7 @@ class ClientManagerBase<TModel extends TetherModel<TModel>>
 
   /// Stream implementation
   @override
-  Stream<List<TModel>> asStream() {
+  Stream<TetherClientReturn<TModel>> asStream() {
     try {
       if (type != SqlOperationType.select) {
         throw UnsupportedError(
@@ -229,39 +246,80 @@ class ClientManagerBase<TModel extends TetherModel<TModel>>
         return rows.map((row) => fromSqliteFactory(row)).toList();
       });
 
+      final controller = StreamController<TetherClientReturn<TModel>>();
+      int? currentRemoteCount;
+
       // Fetch remote data in the background and update the local database
-      supabase
+      (supabase as PostgrestTransformBuilder)
+          .count(CountOption.exact)
           .then((remoteData) async {
-            await upsertSupabaseData(remoteData);
+            currentRemoteCount = remoteData.count;
+            await upsertSupabaseData(remoteData.data);
           })
           .catchError((error) {
             // Log the error but do not interrupt the local stream
-            log('Error fetching remote data: $error');
+            throw Exception('Error fetching remote data: $error');
           });
 
-      return localStream;
-    } catch (e, s) {
-      printLongString('Error in asStream: $e $s');
-      return Stream.error(e);
+      final localSubscription = localStream.listen(
+        (listData) {
+          // When localDataStream emits, package it with the currentRemoteCount
+          // If supabase fetch hasn't completed, currentRemoteCount will be null
+          if (!controller.isClosed) {
+            controller.add(
+              TetherClientReturn<TModel>(
+                data: listData,
+                count: currentRemoteCount,
+              ),
+            );
+          }
+        },
+        onError: (error, stackTrace) {
+          if (!controller.isClosed) {
+            controller.addError(error, stackTrace);
+          }
+        },
+        onDone: () {
+          if (!controller.isClosed) {
+            controller.close();
+          }
+        },
+      );
+      controller.onCancel = () {
+        localSubscription.cancel();
+      };
+
+      return controller.stream;
+    } catch (e) {
+      return Stream.value(
+        TetherClientReturn<TModel>(data: [], error: 'Error in asStream: $e'),
+      );
     }
   }
 
   /// Handle errors
   @override
-  Future<List<TModel>> catchError(
+  Future<TetherClientReturn<TModel>> catchError(
     Function onError, {
     bool Function(Object error)? test,
   }) {
-    return this.then((value) => value).catchError(onError, test: test);
+    return this.then(
+      (value) => TetherClientReturn<TModel>(data: [], error: null),
+      onError: (error) {
+        if (test == null || test(error)) {
+          return TetherClientReturn<TModel>(data: [], error: error.toString());
+        }
+      },
+    );
   }
 
   /// Main execution point - when the future is awaited
   @override
   Future<R> then<R>(
-    FutureOr<R> Function(List<TModel> value) onValue, {
+    FutureOr<R> Function(TetherClientReturn<TModel> value) onValue, {
     Function? onError,
   }) {
-    Future<List<TModel>> operation;
+    Future<TetherClientReturn<TModel>> operation;
 
     switch (type) {
       case SqlOperationType.select:
@@ -271,13 +329,15 @@ class ClientManagerBase<TModel extends TetherModel<TModel>>
         operation = _executeInsert().then((model) => model);
         break;
       case SqlOperationType.update:
-        operation = _executeUpdate().then((model) => [model]);
+        operation = _executeUpdate().then((model) => model);
         break;
       case SqlOperationType.delete:
-        operation = _executeDelete().then((_) => []);
+        operation = _executeDelete().then(
+          (_) => TetherClientReturn<TModel>(data: [], count: 0, error: null),
+        );
         break;
       case SqlOperationType.upsert:
-        operation = _executeUpsert().then((model) => [model]);
+        operation = _executeUpsert().then((model) => model);
         break;
       default:
         throw UnsupportedError('Unsupported operation type: $type');
@@ -288,65 +348,61 @@ class ClientManagerBase<TModel extends TetherModel<TModel>>
 
   /// Timeout implementation
   @override
-  Future<List<TModel>> timeout(
+  Future<TetherClientReturn<TModel>> timeout(
     Duration timeLimit, {
-    FutureOr<List<TModel>> Function()? onTimeout,
+    FutureOr<TetherClientReturn<TModel>> Function()? onTimeout,
   }) {
-    return this.then((value) => value).timeout(timeLimit, onTimeout: onTimeout);
+    return this
+        .then((value) {
+          return value;
+        })
+        .timeout(timeLimit, onTimeout: onTimeout);
   }
 
   /// Completion callback
   @override
-  Future<List<TModel>> whenComplete(FutureOr<void> Function() action) {
+  Future<TetherClientReturn<TModel>> whenComplete(
+    FutureOr<void> Function() action,
+  ) {
     return this.then((value) => value).whenComplete(action);
   }
 
-  Future<List<TModel>> _executeSelect() async {
+  Future<TetherClientReturn<TModel>> _executeSelect() async {
     List<TModel> tetherModels = [];
-    if (isRemoteOnly) {
-      final List<Map<String, dynamic>> remoteData = await supabase;
+    try {
+      if (isLocalOnly) {
+        // Fetch data from the local SQLite database
+        final localData = await localDb.getAll(localQuery!.build().sql);
 
-      tetherModels = remoteData.map((row) => fromJsonFactory(row)).toList();
-      await upsertSupabaseData(remoteData);
+        // Convert local data to TetherModel instances
+        tetherModels = localData.map((row) => fromSqliteFactory(row)).toList();
 
-      return tetherModels;
-    }
+        return TetherClientReturn<TModel>(
+          data: tetherModels,
+          count: tetherModels.length,
+          error: null,
+        );
+      }
 
-    // Fetch data from the local SQLite database
-    final localData = await localDb.getAll(localQuery!.build().sql);
+      final PostgrestResponse<dynamic> remoteData = await (supabase
+              as PostgrestTransformBuilder)
+          .count(CountOption.exact);
 
-    // Convert local data to TetherModel instances
-    tetherModels = localData.map((row) => fromSqliteFactory(row)).toList();
+      tetherModels =
+          remoteData.data.map((row) => fromJsonFactory(row)).toList();
+      await upsertSupabaseData(remoteData.data);
 
-    if (isLocalOnly) {
-      return tetherModels;
-    }
-
-    if (tetherModels.isNotEmpty) {
-      // Fetch data from Supabase in the background and update the local database
-      supabase
-          .then((remoteData) async {
-            await upsertSupabaseData(remoteData);
-          })
-          .catchError((error) {
-            // Log the error but do not interrupt the local data flow
-            print('Error fetching remote data: $error');
-          });
-
-      return tetherModels;
-    } else {
-      // Fetch data from Supabase in the background and update the local database
-      final remoteData = await supabase;
-      await upsertSupabaseData(remoteData);
-
-      final tetherModels =
-          localData.map((row) => fromSqliteFactory(remoteData)).toList();
-
-      return tetherModels;
+      return TetherClientReturn<TModel>(
+        data: tetherModels,
+        count: remoteData.count,
+        error: null,
+      );
+    } catch (e) {
+      return TetherClientReturn<TModel>(data: [], error: e.toString());
     }
   }
 
-  Future<List<TModel>> _executeInsert() async {
+  Future<TetherClientReturn<TModel>> _executeInsert() async {
     if (localQuery == null) {
       throw ArgumentError('localQuery must be provided for INSERT operations.');
     }
@@ -381,13 +437,17 @@ class ClientManagerBase<TModel extends TetherModel<TModel>>
         await tx.execute('RELEASE SAVEPOINT optimistic_insert;');
       });
 
-      return remoteModels;
+      return TetherClientReturn<TModel>(
+        data: remoteModels,
+        count: remoteModels.length,
+        error: null,
+      );
     } catch (error) {
       rethrow;
     }
   }
 
-  Future<TModel> _executeUpdate() async {
+  Future<TetherClientReturn<TModel>> _executeUpdate() async {
     if (localQuery == null) {
       throw ArgumentError('localQuery must be provided for INSERT operations.');
     }
@@ -422,7 +482,11 @@ class ClientManagerBase<TModel extends TetherModel<TModel>>
         await tx.execute('RELEASE SAVEPOINT optimistic_insert;');
       });
 
-      return remoteModel!;
+      return TetherClientReturn<TModel>(
+        data: [remoteModel!],
+        count: 1,
+        error: null,
+      );
     } catch (error) {
       rethrow;
     }
@@ -460,7 +524,7 @@ class ClientManagerBase<TModel extends TetherModel<TModel>>
     }
   }
 
-  Future<TModel> _executeUpsert() async {
+  Future<TetherClientReturn<TModel>> _executeUpsert() async {
     if (localQuery == null) {
       throw ArgumentError('localQuery must be provided for UPSERT operations.');
     }
@@ -495,7 +559,11 @@ class ClientManagerBase<TModel extends TetherModel<TModel>>
         await tx.execute('RELEASE SAVEPOINT optimistic_upsert;');
       });
 
-      return remoteModel!;
+      return TetherClientReturn<TModel>(
+        data: [remoteModel!],
+        count: 1,
+        error: null,
+      );
     } catch (error) {
       rethrow;
     }

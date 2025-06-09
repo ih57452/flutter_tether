@@ -33,9 +33,9 @@ cumbersome to work with, especially when you have the need to cache data locally
 and synchronize it with the remote database. When you factor in the typical need
 for full-text search, I ended up with a very complicated system for interacting
 within my Flutter apps. You could not get around the need to use both the
-Supabase API, interact with GraphQL and a third-party full-text search service
-(and associated synchronization complexity). My ideal solution was to centralize
-all these services through Supabase so that there was a simplified point of
+Supabase API, interact with GraphQL and a third-party search service (and
+associated synchronization complexity). My ideal solution was to centralize all
+these services through Supabase so that there was a simplified point of
 interaction.
 
 ## Technology
@@ -135,6 +135,9 @@ generation:
   background_services:
     enabled: true
 
+  user_preferences:
+    enabled: true
+
   sanitization_endings:
     - _id
     - _fk
@@ -219,14 +222,42 @@ final bookSelect = BooksSelectBuilder()
 
 ### Managers
 
-Managers provide a layer for CRUD operations with caching and synchronization:
+Managers provide a layer for CRUD operations with caching, synchronization, and
+count tracking:
 
 ```dart
 final bookManager = ref.watch(bookManagerProvider);
 
-final books = await bookManager.query
+// Query returns TetherClientReturn<BookModel> with data and count
+final result = await bookManager.query
   .select(bookSelect)
   .eq(BookColumns.published, true)
   .order(BookColumns.createdAt, ascending: false)
   .limit(10);
+
+// Access the data and count
+final books = result.data; // List<BookModel>
+final totalCount = result.count; // int? - total number of matching records
+final hasError = result.hasError; // bool - whether an error occurred
+
+// For streaming with count tracking
+final booksStream = bookManager.query
+  .select(bookSelect)
+  .eq(BookColumns.published, true)
+  .asStream(); // Stream<TetherClientReturn<BookModel>>
 ```
+
+### TetherClientReturn
+
+All manager operations now return a `TetherClientReturn<TModel>` object that
+includes:
+
+- `data`: `List<TModel>` - The actual model instances
+- `count`: `int?` - Total count of records matching the query (when available)
+- `error`: `String?` - Error message if an error occurred
+- `hasError`: `bool` - Convenience getter for checking if an error occurred
+- `single`: `TModel` - Convenience getter for getting the first item (throws if
+  empty)
+
+This provides better information about query results, especially for pagination
+and UI state management.
