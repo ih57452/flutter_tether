@@ -244,16 +244,23 @@ class ModelGenerator {
 
   /// Heuristic to determine if a table is likely a junction table.
   bool _isJunctionTable(SupabaseTableInfo table) {
-    // Simple heuristic: 2 or 3 columns, all are part of the primary key,
-    // and at least two are foreign keys.
-    if (table.columns.length <= 3 && table.columns.length >= 2) {
-      final pkColumns = table.primaryKeys;
-      if (pkColumns.length == table.columns.length &&
-          table.foreignKeys.length >= 2) {
-        // Check if all PK columns are also part of FKs
-        final fkColNames =
-            table.foreignKeys.expand((fk) => fk.originalColumns).toSet();
-        return pkColumns.every((pk) => fkColNames.contains(pk.originalName));
+    // A table is considered a junction table if it has exactly two foreign keys
+    // and a reasonably small number of columns (e.g., its own PK, the two FKs,
+    // and maybe a timestamp or two).
+    if (table.foreignKeys.length == 2) {
+      // Adjust column count check as needed.
+      // 2 columns: FK1, FK2 (composite PK)
+      // 3 columns: PK, FK1, FK2 (like your book_genres)
+      // 4 columns: PK, FK1, FK2, created_at
+      // 5 columns: PK, FK1, FK2, created_at, updated_at
+      if (table.columns.length >= 2 && table.columns.length <= 5) {
+        // Optional: You could add a check to ensure the two FKs point to different tables
+        // if you want to exclude self-referencing M2M relationships from this specific logic.
+        // For example:
+        // if (table.foreignKeys[0].originalForeignTableName == table.foreignKeys[1].originalForeignTableName) {
+        //   return false; // It's a self-referencing M2M junction
+        // }
+        return true;
       }
     }
     return false;
@@ -268,6 +275,7 @@ class ModelGenerator {
     buffer.writeln("import 'dart:convert';");
     buffer.writeln("import 'package:sqlite_async/sqlite3_common.dart';");
     buffer.writeln("import 'package:tether_libs/models/tether_model.dart';");
+    buffer.writeln("import 'package:collection/collection.dart'; // Added for whereNotNull");
     buffer.writeln();
     // Potentially add imports for custom types if needed later
   }

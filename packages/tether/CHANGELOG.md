@@ -10,4 +10,7 @@
 
 - Modified the Auth generator to support the new `auth` table structure.
 
-## 1.0.8
+## 1.1.0
+
+- Fixed generation of M2M helper getter in Models
+- Added support for `TetherClientReturn` in the Feed Manager

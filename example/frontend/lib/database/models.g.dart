@@ -4,6 +4,7 @@
 import 'dart:convert';
 import 'package:sqlite_async/sqlite3_common.dart';
 import 'package:tether_libs/models/tether_model.dart';
+import 'package:collection/collection.dart'; // Added for whereNotNull
 
 /// Represents the `bookstores` table.
 class BookstoreModel extends TetherModel<BookstoreModel> {
@@ -39,6 +40,14 @@ class BookstoreModel extends TetherModel<BookstoreModel> {
   /// The primary key for this model instance.
   @override
   String get localId => id;
+
+  /// Convenience getter for direct access to BookModels from the many-to-many relationship.
+  List<BookModel>? get books {
+    return bookstoreBooks
+        ?.map((joinModel) => joinModel.book)
+        .whereNotNull() // From package:collection
+        .toList();
+  }
 
   /// Creates an instance from a JSON map (e.g., from Supabase).
   factory BookstoreModel.fromJson(Map<String, dynamic> json) {
@@ -316,6 +325,14 @@ class GenreModel extends TetherModel<GenreModel> {
   @override
   String get localId => id;
 
+  /// Convenience getter for direct access to BookModels from the many-to-many relationship.
+  List<BookModel>? get books {
+    return bookGenres
+        ?.map((joinModel) => joinModel.book)
+        .whereNotNull() // From package:collection
+        .toList();
+  }
+
   /// Creates an instance from a JSON map (e.g., from Supabase).
   factory GenreModel.fromJson(Map<String, dynamic> json) {
     return GenreModel(
@@ -582,6 +599,22 @@ class BookModel extends TetherModel<BookModel> {
   /// The primary key for this model instance.
   @override
   String get localId => id;
+
+  /// Convenience getter for direct access to GenreModels from the many-to-many relationship.
+  List<GenreModel>? get genres {
+    return bookGenres
+        ?.map((joinModel) => joinModel.genre)
+        .whereNotNull() // From package:collection
+        .toList();
+  }
+
+  /// Convenience getter for direct access to BookstoreModels from the many-to-many relationship.
+  List<BookstoreModel>? get bookstores {
+    return bookstoreBooks
+        ?.map((joinModel) => joinModel.bookstore)
+        .whereNotNull() // From package:collection
+        .toList();
+  }
 
   /// Creates an instance from a JSON map (e.g., from Supabase).
   factory BookModel.fromJson(Map<String, dynamic> json) {

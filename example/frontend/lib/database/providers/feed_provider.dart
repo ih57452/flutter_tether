@@ -1,3 +1,4 @@
+
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: constant_identifier_names
 
@@ -478,3 +479,8 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
   /// Getter to expose whether more items are available for UI components
   bool get hasMoreItems => _hasMoreItems;
 }
+
+
+
+
+
