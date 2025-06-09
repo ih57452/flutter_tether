@@ -216,6 +216,26 @@ class AuthManager<TProfileModel extends TetherModel<TProfileModel>> {
     );
   }
 
+  Future<void> signInWithPhone({
+    String? email,
+    String? phone,
+    String? emailRedirectTo,
+    bool? shouldCreateUser,
+    Map<String, dynamic>? data,
+    String? captchaToken,
+    OtpChannel channel = OtpChannel.sms,
+  }) {
+    return _supabaseClient.auth.signInWithOtp(
+      email: email,
+      phone: phone,
+      emailRedirectTo: emailRedirectTo,
+      shouldCreateUser: shouldCreateUser,
+      data: data,
+      captchaToken: captchaToken,
+      channel: channel,
+    );
+  }
+
   /// Signs in a user using a one-time password (OTP) received via email or other methods.
   ///
   /// Example (after user receives OTP):
@@ -234,18 +254,25 @@ class AuthManager<TProfileModel extends TetherModel<TProfileModel>> {
   ///   print('OTP Sign-in error: \${e.message}');
   /// }
   /// ```
-  Future<AuthResponse> signInWithOtp({
-    required String email,
-    required String token,
+  Future<AuthResponse> verifyOtp({
+    String? email,
+    String? phone,
+    String? token,
+    required OtpType type,
+    String? redirectTo,
+    String? captchaToken,
+    String? tokenHash,
   }) {
     // Note: Supabase uses verifyOTP for this flow after an initial signInWithOtp call
     // that sends the token. This method assumes the token has been sent and is being verified.
     return _supabaseClient.auth.verifyOTP(
-      type:
-          OtpType
-              .email, // Or other OtpType as appropriate (e.g., sms, phone_change)
-      token: token,
       email: email,
+      phone: phone,
+      token: token,
+      type: type,
+      redirectTo: redirectTo,
+      captchaToken: captchaToken,
+      tokenHash: tokenHash,
     );
   }
 
