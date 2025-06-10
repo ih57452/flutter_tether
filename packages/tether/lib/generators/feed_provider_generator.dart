@@ -20,23 +20,24 @@ class FeedProviderGenerator {
     buffer.writeln('');
     buffer.writeln("""
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: constant_identifier_names
+// ignore_for_file: constant_identifier_names, avoid_public_notifier_properties
 
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sqlite_async/sqlite3_common.dart';
+import 'package:sqlite_async/sqlite_async.dart'; // Ensure SqliteDatabase is imported
+import 'package:tether_libs/client_manager/client_manager.dart';
+import 'package:tether_libs/client_manager/manager/client_manager_base.dart';
+import 'package:tether_libs/client_manager/manager/client_manager_filter_builder.dart';
+import 'package:tether_libs/client_manager/manager/client_manager_models.dart';
 import 'package:tether_libs/models/supabase_select_builder_base.dart';
 import 'package:tether_libs/models/tether_model.dart';
 import 'package:tether_libs/utils/logger.dart';
-import 'package:sqlite_async/sqlite3_common.dart';
-import 'package:tether_libs/client_manager/client_manager.dart';
-import 'package:tether_libs/client_manager/manager/client_manager_filter_builder.dart';
-import 'package:tether_libs/client_manager/manager/client_manager_models.dart';
-import 'package:sqlite_async/sqlite_async.dart'; // Ensure SqliteDatabase is imported
 
 import '../database.dart';
 import '../managers/feed_item_reference_manager.g.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 typedef QueryBuilderFactory<TModel extends TetherModel<TModel>> =
     ClientManagerFilterBuilder<TModel> Function();
@@ -167,7 +168,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
 
     if (selector == null) {
       _logger.severe(
-        "SearchStreamNotifier: selectorStatement is null in feedStream for \${modelTableName}. This indicates a setup error with base query.",
+        'SearchStreamNotifier: selectorStatement is null in feedStream for \$modelTableName. This indicates a setup error with base query.',
       );
       yield <TModel>[];
       return;
@@ -178,7 +179,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
 
     if (selector.currentTableInfo.primaryKeys.isEmpty) {
       _logger.severe(
-        "SearchStreamNotifier: Table \${selector.currentTableInfo.originalName} has no primary keys defined. Cannot build feedStream SQL.",
+        'SearchStreamNotifier: Table \${selector.currentTableInfo.originalName} has no primary keys defined. Cannot build feedStream SQL.',
       );
       yield <TModel>[];
       return;
@@ -283,6 +284,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
           feedKey: feedKey,
           items:
               items
+                  .data
                   .asMap()
                   .entries
                   .map(
@@ -304,6 +306,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
           feedKey: feedKey,
           newItemsToAdd:
               items
+                  .data
                   .asMap()
                   .entries
                   .map(
@@ -325,7 +328,7 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
         state = AsyncValue.error(e, s);
       } else {
         _logger.warning(
-          "SearchStreamNotifier: Error in refreshFeed but unmounted: \$e",
+          'SearchStreamNotifier: Error in refreshFeed but unmounted: \$e',
         );
       }
     }
@@ -341,13 +344,14 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
 
       if (_isDisposed) return;
 
-      if (newItems.isNotEmpty) {
+      if (newItems.data.isNotEmpty) {
         final feedManager = ref.read(feedItemReferenceManagerProvider);
         final effectiveQuery = _getEffectiveQueryBuilder(); // To get tableName
         await feedManager.addItemsToEnd(
           feedKey: _currentSettings.feedKey,
           itemsToAdd:
               newItems
+                  .data
                   .map(
                     (item) => FeedItemReference(
                       itemSourceTable:
@@ -368,13 +372,13 @@ class FeedStreamNotifier<TModel extends TetherModel<TModel>>
         state = AsyncValue.error(e, s);
       } else {
         _logger.warning(
-          "SearchStreamNotifier: Error in fetchMoreItems but unmounted: \$e",
+          'SearchStreamNotifier: Error in fetchMoreItems but unmounted: \$e',
         );
       }
     }
   }
 
-  Future<List<TModel>> _fetch({int rangeStart = 0, int rangeEnd = 20}) async {
+  Future<TetherClientReturn<TModel>> _fetch({int rangeStart = 0, int rangeEnd = 20}) async {
     final effectiveQuery = _getEffectiveQueryBuilder();
     // The textSearch is now part of _getEffectiveQueryBuilder if terms are set
     return await effectiveQuery.range(rangeStart, rangeEnd).remoteOnly();
